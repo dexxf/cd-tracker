@@ -1,44 +1,700 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Login</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
-<body>
-<div class="welcome-text">
-<h1>
-<i class="fab fa-github"></i> Welcome to CodeTracker
-</h1>   
-<div class="selection">
-<p class="inf">Create classes, track student progress, and monitor GitHub activity all in one place.</p>
-<p><i class="fa-solid fa-circle-check"></i> Create and manage your own classes</p>
-<p><i class="fa-solid fa-circle-check"></i> Join classes with unique codes</p>
-<p><i class="fa-solid fa-circle-check"></i> Automated GitHub activity tracking</p>
-</div>
-</div>
-<div class="login-container">
-<div class="electric-aura"></div>
-<div class="login-box">
-<h2>Sign in</h2>
-<button id="githubLogin" class="github-btn">
-<i class="fab fa-github"></i>   
-        Login with GitHub       
-</button>       
-<p>OR</p>       
-<input type="email" class="email-input" placeholder="Enter your Email">
-<button id="emailbLogin" class="email-btn">
-<i class="fa-regular fa-envelope"></i>
-        Continue with Email
-</button>
-<p class ="below">By continuing, you acknowledge Anthropic's <span class="underline">Privacy
-        Policy</span> and agree to get occasional product update and promotion
-        emails.
-</p>
-</div>
-</div>
-<script src="script/script.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CodeTracker — GitHub-Based Student Project Tracking</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="pictures/git.png" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div class="dashboard-wrapper">
+      <header class="site-header">
+        <div class="header-container">
+          <div class="header-left">
+            <div class="brand">
+              <img
+                src="pictures/git.png"
+                alt="CodeTracker Logo"
+                class="brand-logo"
+              />
+            </div>
+            <div class="brand-text">
+              <h1>CodeTracker</h1>
+              <div class="subtitle">GitHub Project Tracking System</div>
+            </div>
+          </div>
+          <div class="header-right">
+            <button id="demoBtn" class="btn-demo">
+              <i class="fas fa-rocket"></i>
+              <span>Load Demo</span>
+            </button>
+            <div class="user-info">
+              <div class="user-name">Israel Cabasug</div>
+              <div class="user-role">Instructor</div>
+              <div class="user-email">israel.cabasug@university.edu</div>
+            </div>
+            <div class="user-avatar">
+              <div class="avatar-initials">IC</div>
+              <div class="avatar-status"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <section class="dashboard-section">
+          <div class="student-profile card glass-card">
+            <div class="profile-left">
+              <div class="avatar-wrapper">
+                <div class="avatar-large">DF</div>
+                <div class="avatar-status active"></div>
+              </div>
+              <div class="person">
+                <h2>Dexter Facelo</h2>
+                <div class="email">dexter.facelo@student.edu</div>
+                <div class="badges">
+                  <span class="badge green">
+                    <i class="fas fa-chart-line"></i>
+                    <span>64% Engagement</span>
+                  </span>
+                  <span class="badge blue">
+                    <i class="fas fa-star"></i>
+                    <span>75% Avg Score</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-title">Completion Rate</div>
+                  <div class="stat-value">0%</div>
+                  <div class="progress">
+                    <div class="progress-bar" style="width: 4%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fas fa-code-commit"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-title">Total Commits</div>
+                  <div class="stat-value">12</div>
+                  <div class="stat-sub">Avg 12 per project</div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">
+                  <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="stat-content">
+                  <div class="stat-title">Active Projects</div>
+                  <div class="stat-value">1</div>
+                  <div class="stat-sub">1/1 submitted</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-tabs card glass-card">
+            <nav class="tab-nav" role="tablist" aria-label="Student view tabs">
+              <button
+                id="tab-overview"
+                class="tab active"
+                role="tab"
+                aria-controls="overview"
+                data-tab="overview"
+              >
+                <i class="fas fa-chart-pie"></i>
+                <span>Overview</span>
+              </button>
+              <button
+                id="tab-assignments"
+                class="tab"
+                role="tab"
+                aria-controls="assignments"
+                data-tab="assignments"
+              >
+                <i class="fas fa-tasks"></i>
+                <span>Assignments</span>
+              </button>
+              <button
+                id="tab-timeline"
+                class="tab"
+                role="tab"
+                aria-controls="timeline"
+                data-tab="timeline"
+              >
+                <i class="fas fa-history"></i>
+                <span>Timeline</span>
+              </button>
+              <button
+                id="tab-analytics"
+                class="tab"
+                role="tab"
+                aria-controls="analytics"
+                data-tab="analytics"
+              >
+                <i class="fas fa-chart-bar"></i>
+                <span>Analytics</span>
+              </button>
+              <!-- <button
+                id="tab-feedback"
+                class="tab"
+                role="tab"
+                aria-controls="feedback"
+                data-tab="feedback"
+              >
+                <i class="fas fa-comment-dots"></i>
+                <span>Feedback</span>
+              </button> -->
+              <button
+                id="tab-quality"
+                class="tab"
+                role="tab"
+                aria-controls="quality"
+                data-tab="quality"
+              >
+                <i class="fas fa-code"></i>
+                <span>Code Quality</span>
+              </button>
+            </nav>
+          </div>
+
+          <div class="dashboard-content">
+            <!-- OVERVIEW TAB -->
+            <section
+              id="overview"
+              class="content card active"
+              role="tabpanel"
+              aria-labelledby="tab-overview"
+            >
+              <div class="section-header">
+                <h3><i class="fas fa-eye"></i> Performance Overview</h3>
+              </div>
+
+              <div class="grid-container">
+                <div class="performance-cards">
+                  <div class="perf-card">
+                    <div class="perf-icon success">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="perf-content">
+                      <div class="perf-label">Completed</div>
+                      <div class="perf-value" id="completedVal">0/1</div>
+                    </div>
+                  </div>
+                  <div class="perf-card">
+                    <div class="perf-icon warning">
+                      <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="perf-content">
+                      <div class="perf-label">In Progress</div>
+                      <div class="perf-value" id="inProgressVal">1</div>
+                    </div>
+                  </div>
+                  <div class="perf-card">
+                    <div class="perf-icon muted">
+                      <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="perf-content">
+                      <div class="perf-label">Not Started</div>
+                      <div class="perf-value" id="notStartedVal">0</div>
+                    </div>
+                  </div>
+                  <div class="perf-card highlight">
+                    <div class="perf-icon primary">
+                      <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="perf-content">
+                      <div class="perf-label">Average Score</div>
+                      <div class="perf-value big" id="avgScoreVal">75%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="heatmap-section card">
+                  <div class="section-header">
+                    <h3>
+                      <i class="fas fa-calendar-alt"></i> Activity Heatmap
+                    </h3>
+                    <div class="section-subtitle">
+                      Coding activity in the last 30 days
+                    </div>
+                  </div>
+                  <div id="heatmapGrid" class="heatmap-grid"></div>
+                  <div class="heatmap-legend">
+                    <span>Less</span>
+                    <div class="legend-cells">
+                      <div class="legend-cell level-0"></div>
+                      <div class="legend-cell level-1"></div>
+                      <div class="legend-cell level-2"></div>
+                      <div class="legend-cell level-3"></div>
+                      <div class="legend-cell level-4"></div>
+                    </div>
+                    <span>More</span>
+                  </div>
+                </div>
+
+                <div class="branches-section card">
+                  <div class="section-header">
+                    <h3>
+                      <i class="fas fa-code-branch"></i> Repository Branches &
+                      Commits
+                    </h3>
+                    <a class="view-all" href="#" target="_blank">
+                      <span>View on GitHub</span>
+                      <i class="fas fa-external-link-alt"></i>
+                    </a>
+                  </div>
+                  <div class="section-subtitle">
+                    System 1 - All branches and commit history
+                  </div>
+                  <div id="branchesList" class="branches-list"></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ASSIGNMENTS TAB -->
+            <section
+              id="assignments"
+              class="content card"
+              role="tabpanel"
+              aria-labelledby="tab-assignments"
+            >
+              <div class="section-header">
+                <h3><i class="fas fa-tasks"></i> Assignments</h3>
+                <button class="btn-secondary" id="generateAssignments">
+                  <i class="fas fa-magic"></i>
+                  Auto-generate
+                </button>
+              </div>
+
+              <div class="assignments-container">
+                <div class="assignments-container">
+
+                <div class="assignments-list">
+                  <h4>Current Assignments</h4>
+                  <ul id="assignList" class="assign-list">
+                    <!-- DEMO SUBMITTED ASSIGNMENT -->
+                    <li class="assignment-item submitted">
+                      <div class="assignment-header">
+                        <h5>System 1 - GitHub Integration</h5>
+                        <span class="status-badge success">Submitted</span>
+                      </div>
+
+                      <div class="assignment-details">
+                        <p><strong>Due:</strong> March 10, 2026</p>
+                        <p><strong>Difficulty:</strong> Medium</p>
+                        <p>
+                          <strong>Student Submission:</strong>
+                          <a href="#" target="_blank">View Repository</a>
+                        </p>
+                      </div>
+
+                      <div class="assignment-progress">
+                        <div class="progress">
+                          <div
+                            class="progress-bar success"
+                            style="width: 75%"
+                          ></div>
+                        </div>
+                        <span>Progress: 75%</span>
+                      </div>
+
+                      <div class="assignment-actions">
+                        <button class="btn-primary give-feedback-btn">
+                          <i class="fas fa-comment"></i> Give Feedback
+                        </button>
+
+                        <button class="btn-secondary review-feedback-btn">
+                          <i class="fas fa-eye"></i> Review Feedback
+                        </button>
+                      </div>
+
+                      <!-- Hidden Feedback Box -->
+                      <div class="feedback-box hidden">
+                        <textarea
+                          placeholder="Write feedback to student..."
+                        ></textarea>
+                        <button class="btn-primary save-feedback-btn">
+                          Save Feedback
+                        </button>
+                      </div>
+
+                      <!-- Feedback History -->
+                      <div class="feedback-history hidden">
+                        <div class="feedback-entry">
+                          <strong>Professor:</strong>
+                          <p>
+                            Good structure and clean repository. Improve
+                            documentation and commit messages.
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- TIMELINE TAB -->
+            <section
+              id="timeline"
+              class="content card"
+              role="tabpanel"
+              aria-labelledby="tab-timeline"
+            >
+              <div class="section-header">
+                <h3><i class="fas fa-history"></i> Activity Timeline</h3>
+                <div class="timeline-stats">
+                  <span class="stat-badge success">
+                    <i class="fas fa-check"></i>
+                    <span>Passed: <strong id="passedCount">0</strong></span>
+                  </span>
+                  <span class="stat-badge">
+                    <i class="fas fa-list-ol"></i>
+                    <span>Total: <strong id="timelineTotal">0</strong></span>
+                  </span>
+                </div>
+              </div>
+              <div class="timeline-container">
+                <div class="timeline">
+                  <ul class="timeline-list" id="timelineList"></ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- ANALYTICS TAB -->
+            <section
+              id="analytics"
+              class="content card"
+              role="tabpanel"
+              aria-labelledby="tab-analytics"
+            >
+              <div class="section-header">
+                <h3><i class="fas fa-chart-bar"></i> Analytics</h3>
+              </div>
+
+              <div class="analytics-grid">
+                <div class="analytics-card card">
+                  <div class="card-header">
+                    <h4><i class="fas fa-users"></i> Class Comparison</h4>
+                  </div>
+                  <div class="comparison-metrics">
+                    <div class="metric">
+                      <div class="metric-label">Completion Rate</div>
+                      <div class="metric-value">
+                        <div class="progress-comparison">
+                          <div class="progress student">
+                            <div
+                              class="progress-bar"
+                              id="completionBarInner"
+                              style="width: 0%"
+                            ></div>
+                          </div>
+                          <div class="progress average">
+                            <div class="progress-bar" style="width: 65%"></div>
+                          </div>
+                        </div>
+                        <div class="metric-details">
+                          <span class="student-score" id="completionText"
+                            >0%</span
+                          >
+                          <span class="average-score">Avg: 65%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="metric">
+                      <div class="metric-label">Average Score</div>
+                      <div class="metric-value">
+                        <div class="progress-comparison">
+                          <div class="progress student">
+                            <div
+                              class="progress-bar"
+                              id="avgScoreBarInner"
+                              style="width: 75%"
+                            ></div>
+                          </div>
+                          <div class="progress average">
+                            <div class="progress-bar" style="width: 72%"></div>
+                          </div>
+                        </div>
+                        <div class="metric-details">
+                          <span class="student-score" id="avgScoreText"
+                            >75%</span
+                          >
+                          <span class="average-score">Avg: 72%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="analytics-card card">
+                  <div class="card-header">
+                    <h4>
+                      <i class="fas fa-crystal-ball"></i> Progress Prediction
+                    </h4>
+                  </div>
+                  <div class="prediction-content">
+                    <div class="prediction-value">
+                      <div class="prediction-label">Predicted Final Grade</div>
+                      <div class="prediction-number" id="predValue">80%</div>
+                    </div>
+                    <div class="prediction-chart">
+                      <div class="chart-bar" style="height: 80%"></div>
+                    </div>
+                    <div class="prediction-note">
+                      <i class="fas fa-info-circle"></i>
+                      Based on current progress and engagement metrics
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- NEW: Grade Distribution Chart -->
+              <div class="grade-distribution card" style="margin-top: 24px">
+                <div class="card-header">
+                  <h4><i class="fas fa-chart-pie"></i> Grade Distribution</h4>
+                </div>
+                <div class="chart-container">
+                  <canvas id="gradeChart" width="400" height="200"></canvas>
+                </div>
+                <div class="chart-legend" id="gradeLegend"></div>
+              </div>
+            </section>
+
+            <!-- FEEDBACK TAB
+            <section
+              id="feedback"
+              class="content card"
+              role="tabpanel"
+              aria-labelledby="tab-feedback"
+            >
+              <div class="section-header">
+                <h3><i class="fas fa-comment-dots"></i> Feedback</h3>
+              </div>
+
+              <div class="feedback-container">
+                <div class="feedback-list" id="feedbackList"></div>
+
+                <div class="feedback-history card">
+                  <div class="card-header">
+                    <h4><i class="fas fa-history"></i> Feedback History</h4>
+                  </div>
+                  <div id="feedbackHistory" class="history-content"></div>
+                </div>
+              </div>
+            </section> -->
+
+            <!-- NEW: CODE QUALITY TAB -->
+            <section
+              id="quality"
+              class="content card"
+              role="tabpanel"
+              aria-labelledby="tab-quality"
+            >
+              <div class="section-header">
+                <h3><i class="fas fa-code"></i> Code Quality Metrics</h3>
+                <div class="quality-score">
+                  <div class="score-circle" id="qualityScoreCircle">
+                    <span class="score-value" id="qualityScore">82</span>
+                  </div>
+                  <div class="score-label">Code Quality Score</div>
+                </div>
+              </div>
+
+              <div class="quality-grid">
+                <!-- Code Complexity Metrics -->
+                <div class="quality-card card">
+                  <div class="card-header">
+                    <h4><i class="fas fa-sitemap"></i> Complexity Analysis</h4>
+                  </div>
+                  <div class="quality-metrics">
+                    <div class="quality-metric">
+                      <div class="metric-info">
+                        <span class="metric-label">Cyclomatic Complexity</span>
+                        <span class="metric-value" id="cyclomaticComplexity"
+                          >12.3</span
+                        >
+                      </div>
+                      <div class="progress">
+                        <div class="progress-bar" style="width: 60%"></div>
+                      </div>
+                      <div class="metric-status good">Good</div>
+                    </div>
+                    <div class="quality-metric">
+                      <div class="metric-info">
+                        <span class="metric-label">Maintainability Index</span>
+                        <span class="metric-value" id="maintainabilityIndex"
+                          >78</span
+                        >
+                      </div>
+                      <div class="progress">
+                        <div class="progress-bar" style="width: 78%"></div>
+                      </div>
+                      <div class="metric-status good">Good</div>
+                    </div>
+                    <div class="quality-metric">
+                      <div class="metric-info">
+                        <span class="metric-label">Code Duplication</span>
+                        <span class="metric-value" id="codeDuplication"
+                          >5.2%</span
+                        >
+                      </div>
+                      <div class="progress">
+                        <div
+                          class="progress-bar warning"
+                          style="width: 52%"
+                        ></div>
+                      </div>
+                      <div class="metric-status warning">Acceptable</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Code Standards -->
+                <div class="quality-card card">
+                  <div class="card-header">
+                    <h4>
+                      <i class="fas fa-clipboard-check"></i> Code Standards
+                    </h4>
+                  </div>
+                  <div class="standards-list">
+                    <div class="standard-item">
+                      <i class="fas fa-check-circle success"></i>
+                      <span>Naming conventions</span>
+                      <span class="standard-score">92%</span>
+                    </div>
+                    <div class="standard-item">
+                      <i class="fas fa-check-circle success"></i>
+                      <span>Code formatting</span>
+                      <span class="standard-score">88%</span>
+                    </div>
+                    <div class="standard-item">
+                      <i class="fas fa-exclamation-triangle warning"></i>
+                      <span>Documentation coverage</span>
+                      <span class="standard-score">45%</span>
+                    </div>
+                    <div class="standard-item">
+                      <i class="fas fa-check-circle success"></i>
+                      <span>Error handling</span>
+                      <span class="standard-score">76%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Test Coverage -->
+                <div class="quality-card card">
+                  <div class="card-header">
+                    <h4><i class="fas fa-vial"></i> Test Coverage</h4>
+                  </div>
+                  <div class="test-coverage">
+                    <div class="coverage-chart">
+                      <canvas
+                        id="testCoverageChart"
+                        width="150"
+                        height="150"
+                      ></canvas>
+                    </div>
+                    <div class="coverage-details">
+                      <div class="coverage-item">
+                        <span class="coverage-label">Unit Tests</span>
+                        <span class="coverage-value">78%</span>
+                      </div>
+                      <div class="coverage-item">
+                        <span class="coverage-label">Integration Tests</span>
+                        <span class="coverage-value">45%</span>
+                      </div>
+                      <div class="coverage-item">
+                        <span class="coverage-label">Total Coverage</span>
+                        <span class="coverage-value success">65%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Issues & Improvements -->
+                <div class="quality-card card">
+                  <div class="card-header">
+                    <h4>
+                      <i class="fas fa-lightbulb"></i> Suggested Improvements
+                    </h4>
+                  </div>
+                  <div class="improvements-list">
+                    <div class="improvement-item">
+                      <i class="fas fa-exclamation-circle warning"></i>
+                      <div>
+                        <strong>Increase documentation</strong>
+                        <p>
+                          Add more comments and documentation to complex
+                          functions
+                        </p>
+                      </div>
+                    </div>
+                    <div class="improvement-item">
+                      <i class="fas fa-exclamation-circle warning"></i>
+                      <div>
+                        <strong>Reduce function complexity</strong>
+                        <p>
+                          Break down large functions into smaller, focused ones
+                        </p>
+                      </div>
+                    </div>
+                    <div class="improvement-item">
+                      <i class="fas fa-check-circle success"></i>
+                      <div>
+                        <strong>Great code structure</strong>
+                        <p>Clean separation of concerns and modular design</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div class="footer-content">
+          <div class="footer-left">
+            <div class="footer-brand">
+              <img
+                src="pictures/git.png"
+                alt="CodeTracker Logo"
+                class="footer-logo"
+              />
+              <span>CodeTracker</span>
+            </div>
+            <small>GitHub-Based Student Project Tracking System</small>
+          </div>
+          <div class="footer-right">
+            <small
+              >Built for demo — uses GitHub public API for analysis. Rate limits
+              apply.</small
+            >
+            <div class="footer-links">
+              <a href="#"><i class="fab fa-github"></i> GitHub</a>
+              <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+              <a href="#"><i class="fas fa-cog"></i> Settings</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
 </html>
