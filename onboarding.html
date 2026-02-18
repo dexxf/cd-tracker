@@ -1,577 +1,731 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Complete Your Profile — CodeTracker</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #0d0d0f;
-      --surface: #141417;
-      --card: #1a1a1f;
-      --border: #2a2a32;
-      --accent: #c8f135;
-      --accent-dim: rgba(200, 241, 53, 0.12);
-      --text: #f0f0ee;
-      --muted: #6b6b78;
-      --error: #ff5a5a;
-      --success: #4effa0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complete Your Profile — CodeTracker</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0d1117;
+        --surface: #161b22;
+        --card: #161b22;
+        --border: #30363d;
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+        --text: #e6edf3;
+        --muted: #8b949e;
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 16px;
-    }
+        --accent: #58a6ff;
+        --accent-dim: rgba(88, 166, 255, 0.15);
 
-    /* noise overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
+        --error: #ff7b72;
+        --success: #3fb950;
+      }
 
-    .wrapper {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 560px;
-    }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    /* Header */
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 32px;
-    }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px;
+      }
 
-    .brand-mark {
-      width: 36px;
-      height: 36px;
-      background: var(--accent);
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-    }
+      /* noise overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+      }
 
-    .brand-mark svg { width: 20px; height: 20px; }
+      .wrapper {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 560px;
+      }
 
-    .brand-name {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 18px;
-      letter-spacing: -0.03em;
-    }
+      /* Header */
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 32px;
+      }
 
-    .page-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 1.1;
-      margin-bottom: 8px;
-    }
+      .brand-mark {
+        background: var(--accent);
+      }
 
-    .page-title span { color: var(--accent); }
+      .brand-mark svg {
+        width: 20px;
+        height: 20px;
+      }
 
-    .page-sub {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 36px;
-    }
+      .brand-name {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 18px;
+        letter-spacing: -0.03em;
+      }
 
-    /* Card */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-    }
+      .page-title {
+        font-family: "Syne", sans-serif;
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        margin-bottom: 8px;
+      }
 
-    /* Section */
-    .section-label {
-      font-family: 'Syne', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 18px;
-    }
+      .page-title span {
+        color: var(--accent);
+      }
 
-    .section + .section { margin-top: 28px; }
+      .page-sub {
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 36px;
+      }
 
-    /* Divider */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 28px 0;
-    }
+      /* Card */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+      }
 
-    /* Grid */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+      /* Section */
+      .section-label {
+        font-family: "Syne", sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 18px;
+      }
 
-    /* Form group */
-    .fg {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
+      .section + .section {
+        margin-top: 28px;
+      }
 
-    .fg:last-child { margin-bottom: 0; }
+      /* Divider */
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 28px 0;
+      }
 
-    label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
+      /* Grid */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
 
-    .req { color: var(--accent); }
+      /* Form group */
+      .fg {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
 
-    input, select, textarea {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      padding: 11px 14px;
-      width: 100%;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
+      .fg:last-child {
+        margin-bottom: 0;
+      }
 
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(200,241,53,0.08);
-    }
+      label {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
 
-    input.err, select.err, textarea.err { border-color: var(--error); }
+      .req {
+        color: var(--accent);
+      }
 
-    select option { background: var(--surface); }
+      input,
+      select,
+      textarea {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        padding: 11px 14px;
+        width: 100%;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+      }
 
-    textarea { resize: vertical; min-height: 80px; }
+      input.err,
+      select.err,
+      textarea.err {
+        border-color: var(--error);
+      }
 
-    /* calendar icon color fix */
-    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+      select option {
+        background: var(--surface);
+      }
 
-    /* Error text */
-    .err-text {
-      font-size: 11px;
-      color: var(--error);
-      display: none;
-    }
+      textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
 
-    .err-text.show { display: block; }
+      /* calendar icon color fix */
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.5);
+        cursor: pointer;
+      }
 
-    /* File upload */
-    .upload-zone {
-      border: 1.5px dashed var(--border);
-      border-radius: 10px;
-      padding: 18px 16px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      cursor: pointer;
-      position: relative;
-      transition: border-color 0.2s, background 0.2s;
-    }
+      /* Error text */
+      .err-text {
+        font-size: 11px;
+        color: var(--error);
+        display: none;
+      }
 
-    .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: var(--accent-dim); }
-    .upload-zone.has-file { border-style: solid; border-color: var(--accent); }
-    .upload-zone.err { border-color: var(--error); }
+      .err-text.show {
+        display: block;
+      }
 
-    .upload-zone input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
+      .upload-zone {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 18px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+      }
 
-    .avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: var(--surface);
-      border: 1.5px solid var(--border);
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      overflow: hidden;
-      font-size: 22px;
-    }
+      /* Hover highlight */
+      .upload-zone:hover,
+      .upload-zone.drag {
+        border-color: var(--accent);
+        background: rgba(88, 166, 255, 0.08);
+        box-shadow:
+          0 0 0 1px var(--accent),
+          0 0 25px rgba(88, 166, 255, 0.15);
+      }
 
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+      /* When file selected */
+      .upload-zone.has-file {
+        border-color: var(--accent);
+        background: rgba(88, 166, 255, 0.06);
+        box-shadow: 0 0 0 1px var(--accent);
+      }
 
-    .upload-info { pointer-events: none; flex: 1; min-width: 0; }
+      /* Error state */
+      .upload-zone.err {
+        border-color: var(--error);
+        background: rgba(255, 123, 114, 0.08);
+      }
 
-    .upload-title { font-size: 13px; font-weight: 500; color: var(--text); }
-    .upload-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .upload-fname { font-size: 12px; color: var(--accent); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: none; }
+      .upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+      }
 
-    /* Alert */
-    .alert {
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 13px;
-      margin-bottom: 20px;
-      display: none;
-    }
+      .avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        overflow: hidden;
+        font-size: 22px;
+      }
 
-    .alert.show { display: block; }
-    .alert.success { background: rgba(78,255,160,0.1); color: var(--success); border: 1px solid rgba(78,255,160,0.2); }
-    .alert.error   { background: rgba(255,90,90,0.1);  color: var(--error);   border: 1px solid rgba(255,90,90,0.2); }
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
 
-    /* Submit button */
-    .btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent);
-      color: #0d0d0f;
-      border: none;
-      border-radius: 10px;
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 28px;
-      transition: opacity 0.2s, transform 0.15s;
-    }
+      .upload-info {
+        pointer-events: none;
+        flex: 1;
+        min-width: 0;
+      }
 
-    .btn:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.92; }
-    .btn:active:not(:disabled) { transform: translateY(0); }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      .upload-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .upload-hint {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .upload-fname {
+        font-size: 12px;
+        color: var(--accent);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: none;
+      }
 
-    .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(0,0,0,0.2);
-      border-top-color: #0d0d0f;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      display: none;
-    }
+      /* Alert */
+      .alert {
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 13px;
+        margin-bottom: 20px;
+        display: none;
+      }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+      .alert.show {
+        display: block;
+      }
+      .alert.success {
+        background: rgba(78, 255, 160, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(78, 255, 160, 0.2);
+      }
+      .alert.error {
+        background: rgba(255, 90, 90, 0.1);
+        color: var(--error);
+        border: 1px solid rgba(255, 90, 90, 0.2);
+      }
 
-    @media (max-width: 480px) {
-      .grid-2 { grid-template-columns: 1fr; }
-      .card { padding: 22px; }
-    }
-  </style>
-</head>
-<body>
-<div class="wrapper">
-  <div class="brand">
-    <div class="brand-mark">
-      <svg viewBox="0 0 20 20" fill="none">
-        <path d="M4 10l4 4 8-8" stroke="#0d0d0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <span class="brand-name">CodeTracker</span>
-  </div>
+      /* Submit button */
+      .btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        color: #0d1117;
+        border: none;
+        border-radius: 10px;
+        font-family: "Syne", sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 28px;
+        transition: all 0.2s ease;
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.25);
+      }
 
-  <div class="page-title">Complete your<br /><span>profile.</span></div>
-  <p class="page-sub">One-time setup — takes less than a minute.</p>
+      .btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 0 25px rgba(88, 166, 255, 0.45);
+      }
 
-  <div class="alert" id="alert"></div>
+      .btn:active:not(:disabled) {
+        transform: translateY(0);
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
 
-  <div class="card">
-    <form id="regForm" novalidate>
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-top-color: #0d0d0f;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        display: none;
+      }
 
-      <!-- Personal -->
-      <div class="section">
-        <div class="section-label">Personal info</div>
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-        <div class="grid-2">
-          <div class="fg">
-            <label>First Name <span class="req">*</span></label>
-            <input type="text" id="firstName" placeholder="John" />
-            <span class="err-text" id="firstNameErr">Required</span>
-          </div>
-          <div class="fg">
-            <label>Last Name <span class="req">*</span></label>
-            <input type="text" id="lastName" placeholder="Doe" />
-            <span class="err-text" id="lastNameErr">Required</span>
-          </div>
+      @media (max-width: 480px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          padding: 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path
+              d="M4 10l4 4 8-8"
+              stroke="#0d0d0f"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
         </div>
-
-        <div class="grid-2">
-          <div class="fg">
-            <label>Phone <span class="req">*</span></label>
-            <input type="tel" id="phoneNumber" placeholder="+1 555 000 0000" />
-            <span class="err-text" id="phoneNumberErr">Required</span>
-          </div>
-          <div class="fg">
-            <label>Birthday <span class="req">*</span></label>
-            <input type="date" id="birthday" />
-            <span class="err-text" id="birthdayErr">Required</span>
-          </div>
-        </div>
-
-        <div class="fg">
-          <label>Gender <span class="req">*</span></label>
-          <select id="gender">
-            <option value="">Select gender</option>
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
-            <option value="OTHER">Other</option>
-            <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
-          </select>
-          <span class="err-text" id="genderErr">Required</span>
-        </div>
+        <span class="brand-name">CodeTracker</span>
       </div>
 
-      <div class="divider"></div>
+      <div class="page-title">Complete your<br /><span>profile.</span></div>
+      <p class="page-sub">One-time setup — takes less than a minute.</p>
 
-      <!-- Profile -->
-      <div class="section">
-        <div class="section-label">Profile</div>
+      <div class="alert" id="alert"></div>
 
-        <div class="fg">
-          <label>Profile Picture <span class="req">*</span></label>
-          <div class="upload-zone" id="uploadZone">
-            <input type="file" id="profileFile" accept="image/*" />
-            <div class="avatar" id="avatar">👤</div>
-            <div class="upload-info">
-              <div class="upload-title" id="uploadTitle">Click or drop to upload a photo</div>
-              <div class="upload-hint" id="uploadHint">PNG, JPG, GIF — max 5 MB</div>
-              <div class="upload-fname" id="uploadFname"></div>
+      <div class="card">
+        <form id="regForm" novalidate>
+          <!-- Personal -->
+          <div class="section">
+            <div class="section-label">Personal info</div>
+
+            <div class="grid-2">
+              <div class="fg">
+                <label>First Name <span class="req">*</span></label>
+                <input type="text" id="firstName" placeholder="John" />
+                <span class="err-text" id="firstNameErr">Required</span>
+              </div>
+              <div class="fg">
+                <label>Last Name <span class="req">*</span></label>
+                <input type="text" id="lastName" placeholder="Doe" />
+                <span class="err-text" id="lastNameErr">Required</span>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="fg">
+                <label>Phone <span class="req">*</span></label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  placeholder="+1 555 000 0000"
+                />
+                <span class="err-text" id="phoneNumberErr">Required</span>
+              </div>
+              <div class="fg">
+                <label>Birthday <span class="req">*</span></label>
+                <input type="date" id="birthday" />
+                <span class="err-text" id="birthdayErr">Required</span>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Gender <span class="req">*</span></label>
+              <select id="gender">
+                <option value="">Select gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+                <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+              </select>
+              <span class="err-text" id="genderErr">Required</span>
             </div>
           </div>
-          <span class="err-text" id="profileFileErr">Profile picture is required</span>
-        </div>
 
-        <div class="fg">
-          <label>Bio <span style="color:var(--muted);font-size:10px;">(optional)</span></label>
-          <textarea id="bio" placeholder="Tell us about yourself…"></textarea>
-          <span class="err-text" id="bioErr"></span>
-        </div>
+          <div class="divider"></div>
+
+          <!-- Profile -->
+          <div class="section">
+            <div class="section-label">Profile</div>
+
+            <div class="fg">
+              <label>Profile Picture <span class="req">*</span></label>
+              <div class="upload-zone" id="uploadZone">
+                <input type="file" id="profileFile" accept="image/*" />
+                <div class="avatar" id="avatar">👤</div>
+                <div class="upload-info">
+                  <div class="upload-title" id="uploadTitle">
+                    Click or drop to upload a photo
+                  </div>
+                  <div class="upload-hint" id="uploadHint">
+                    PNG, JPG, GIF — max 5 MB
+                  </div>
+                  <div class="upload-fname" id="uploadFname"></div>
+                </div>
+              </div>
+              <span class="err-text" id="profileFileErr"
+                >Profile picture is required</span
+              >
+            </div>
+
+            <div class="fg">
+              <label
+                >Bio
+                <span style="color: var(--muted); font-size: 10px"
+                  >(optional)</span
+                ></label
+              >
+              <textarea
+                id="bio"
+                placeholder="Tell us about yourself…"
+              ></textarea>
+              <span class="err-text" id="bioErr"></span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn" id="submitBtn">
+            <span class="spinner" id="spinner"></span>
+            Complete Profile
+          </button>
+        </form>
       </div>
+    </div>
 
-      <button type="submit" class="btn" id="submitBtn">
-        <span class="spinner" id="spinner"></span>
-        Complete Profile
-      </button>
-    </form>
-  </div>
-</div>
+    <script>
+      const API_BASE = "http://localhost:8080";
+      const ENDPOINT = "/api/users/register";
 
-<script>
-  const API_BASE = 'http://localhost:8080';
-  const ENDPOINT = '/api/users/register';
+      // ── Elements ──────────────────────────────────────────────
+      const form = document.getElementById("regForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const spinner = document.getElementById("spinner");
+      const alertEl = document.getElementById("alert");
+      const fileInput = document.getElementById("profileFile");
+      const uploadZone = document.getElementById("uploadZone");
+      const avatar = document.getElementById("avatar");
+      const uploadTitle = document.getElementById("uploadTitle");
+      const uploadHint = document.getElementById("uploadHint");
+      const uploadFname = document.getElementById("uploadFname");
 
-  // ── Elements ──────────────────────────────────────────────
-  const form       = document.getElementById('regForm');
-  const submitBtn  = document.getElementById('submitBtn');
-  const spinner    = document.getElementById('spinner');
-  const alertEl    = document.getElementById('alert');
-  const fileInput  = document.getElementById('profileFile');
-  const uploadZone = document.getElementById('uploadZone');
-  const avatar     = document.getElementById('avatar');
-  const uploadTitle= document.getElementById('uploadTitle');
-  const uploadHint = document.getElementById('uploadHint');
-  const uploadFname= document.getElementById('uploadFname');
-
-  // ── Validators ────────────────────────────────────────────
-  const validators = {
-    firstName:   v => v.trim() ? null : 'First name is required',
-    lastName:    v => v.trim() ? null : 'Last name is required',
-    phoneNumber: v => {
-      if (!v.trim()) return 'Phone number is required';
-      return /^\+?[\d\s\-()+]+$/.test(v) ? null : 'Invalid phone format';
-    },
-    birthday: v => {
-      if (!v) return 'Birthday is required';
-      const d = new Date(v), now = new Date();
-      if (d >= now) return 'Must be in the past';
-      if (now.getFullYear() - d.getFullYear() < 13) return 'Must be at least 13';
-      return null;
-    },
-    gender: v => v ? null : 'Gender is required',
-    bio: v => v.length > 500 ? 'Max 500 characters' : null
-  };
-
-  function setFieldError(id, msg) {
-    const el = document.getElementById(id);
-    const err = document.getElementById(id + 'Err');
-    if (msg) {
-      el.classList.add('err');
-      err.textContent = msg;
-      err.classList.add('show');
-      return false;
-    }
-    el.classList.remove('err');
-    err.classList.remove('show');
-    return true;
-  }
-
-  function validateField(id) {
-    const v = validators[id];
-    if (!v) return true;
-    const el = document.getElementById(id);
-    return setFieldError(id, v(el.value));
-  }
-
-  function validateFile() {
-    const f = fileInput.files[0];
-    if (!f) { showFileError('Profile picture is required'); return false; }
-    if (!f.type.startsWith('image/')) { showFileError('Must be an image'); return false; }
-    if (f.size > 5 * 1024 * 1024) { showFileError('Max size is 5 MB'); return false; }
-    clearFileError();
-    return true;
-  }
-
-  function showFileError(msg) {
-    uploadZone.classList.add('err');
-    const e = document.getElementById('profileFileErr');
-    e.textContent = msg;
-    e.classList.add('show');
-  }
-
-  function clearFileError() {
-    uploadZone.classList.remove('err');
-    document.getElementById('profileFileErr').classList.remove('show');
-  }
-
-  function validateAll() {
-    const fields = Object.keys(validators).map(id => validateField(id));
-    const file = validateFile();
-    return fields.every(Boolean) && file;
-  }
-
-  // ── Real-time validation ──────────────────────────────────
-  Object.keys(validators).forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('blur', () => validateField(id));
-      el.addEventListener('input', () => validateField(id));
-    }
-  });
-
-  // ── File preview ──────────────────────────────────────────
-  fileInput.addEventListener('change', handleFile);
-
-  function handleFile() {
-    const f = fileInput.files[0];
-    if (!f) return;
-    validateFile();
-    uploadFname.textContent = f.name;
-    uploadFname.style.display = 'block';
-    uploadTitle.textContent = 'Photo selected';
-    uploadHint.style.display = 'none';
-    uploadZone.classList.add('has-file');
-    const reader = new FileReader();
-    reader.onload = e => { avatar.innerHTML = `<img src="${e.target.result}" alt="preview">`; };
-    reader.readAsDataURL(f);
-  }
-
-  // Drag & drop
-  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
-  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
-  uploadZone.addEventListener('drop', e => {
-    e.preventDefault();
-    uploadZone.classList.remove('drag');
-    const f = e.dataTransfer.files[0];
-    if (!f) return;
-    const dt = new DataTransfer();
-    dt.items.add(f);
-    fileInput.files = dt.files;
-    handleFile();
-  });
-
-  // ── Submit ────────────────────────────────────────────────
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    if (!validateAll()) return;
-
-    spinner.style.display = 'inline-block';
-    submitBtn.disabled = true;
-    alertEl.className = 'alert';
-
-    try {
-      // ── Build the 3 parts Spring now expects ──
-      // Part 1: "data" — JSON blob of all text fields
-      const dataPayload = {
-        firstName:   document.getElementById('firstName').value.trim(),
-        lastName:    document.getElementById('lastName').value.trim(),
-        phoneNumber: document.getElementById('phoneNumber').value.trim(),
-        gender:      document.getElementById('gender').value,
-        birthday:    document.getElementById('birthday').value,
-        bio:         document.getElementById('bio').value.trim() || null
+      // ── Validators ────────────────────────────────────────────
+      const validators = {
+        firstName: (v) => (v.trim() ? null : "First name is required"),
+        lastName: (v) => (v.trim() ? null : "Last name is required"),
+        phoneNumber: (v) => {
+          if (!v.trim()) return "Phone number is required";
+          return /^\+?[\d\s\-()+]+$/.test(v) ? null : "Invalid phone format";
+        },
+        birthday: (v) => {
+          if (!v) return "Birthday is required";
+          const d = new Date(v),
+            now = new Date();
+          if (d >= now) return "Must be in the past";
+          if (now.getFullYear() - d.getFullYear() < 13)
+            return "Must be at least 13";
+          return null;
+        },
+        gender: (v) => (v ? null : "Gender is required"),
+        bio: (v) => (v.length > 500 ? "Max 500 characters" : null),
       };
 
-      const formData = new FormData();
-      formData.append(
-        'data',
-        new Blob([JSON.stringify(dataPayload)], { type: 'application/json' })
-      );
+      function setFieldError(id, msg) {
+        const el = document.getElementById(id);
+        const err = document.getElementById(id + "Err");
+        if (msg) {
+          el.classList.add("err");
+          err.textContent = msg;
+          err.classList.add("show");
+          return false;
+        }
+        el.classList.remove("err");
+        err.classList.remove("show");
+        return true;
+      }
 
-      // Part 2: "profile" — the MultipartFile
-      formData.append('profile', fileInput.files[0]);
+      function validateField(id) {
+        const v = validators[id];
+        if (!v) return true;
+        const el = document.getElementById(id);
+        return setFieldError(id, v(el.value));
+      }
 
-      // Part 3: principal is handled automatically by Spring Security — nothing to append.
+      function validateFile() {
+        const f = fileInput.files[0];
+        if (!f) {
+          showFileError("Profile picture is required");
+          return false;
+        }
+        if (!f.type.startsWith("image/")) {
+          showFileError("Must be an image");
+          return false;
+        }
+        if (f.size > 5 * 1024 * 1024) {
+          showFileError("Max size is 5 MB");
+          return false;
+        }
+        clearFileError();
+        return true;
+      }
 
-      const res = await fetch(`${API_BASE}${ENDPOINT}`, {
-        method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        credentials: 'include',   // sends session cookie / JWT cookie
-        body: formData
+      function showFileError(msg) {
+        uploadZone.classList.add("err");
+        const e = document.getElementById("profileFileErr");
+        e.textContent = msg;
+        e.classList.add("show");
+      }
+
+      function clearFileError() {
+        uploadZone.classList.remove("err");
+        document.getElementById("profileFileErr").classList.remove("show");
+      }
+
+      function validateAll() {
+        const fields = Object.keys(validators).map((id) => validateField(id));
+        const file = validateFile();
+        return fields.every(Boolean) && file;
+      }
+
+      // ── Real-time validation ──────────────────────────────────
+      Object.keys(validators).forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("blur", () => validateField(id));
+          el.addEventListener("input", () => validateField(id));
+        }
       });
 
-      if (res.status === 401) { showAlert('error', 'Session expired — please log in again.'); return; }
+      // ── File preview ──────────────────────────────────────────
+      fileInput.addEventListener("change", handleFile);
 
-      const ct = res.headers.get('content-type') || '';
-      const result = ct.includes('application/json')
-        ? await res.json()
-        : { success: false, message: 'Unexpected response from server' };
-
-      if (res.ok && result.success) {
-        showAlert('success', result.message || 'Profile completed!');
-        if (result.data) localStorage.setItem('userData', JSON.stringify(result.data));
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
-      } else {
-        showAlert('error', result.message || 'Registration failed. Try again.');
+      function handleFile() {
+        const f = fileInput.files[0];
+        if (!f) return;
+        validateFile();
+        uploadFname.textContent = f.name;
+        uploadFname.style.display = "block";
+        uploadTitle.textContent = "Photo selected";
+        uploadHint.style.display = "none";
+        uploadZone.classList.add("has-file");
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          avatar.innerHTML = `<img src="${e.target.result}" alt="preview">`;
+        };
+        reader.readAsDataURL(f);
       }
-    } catch (err) {
-      showAlert('error', `Network error: ${err.message}`);
-    } finally {
-      spinner.style.display = 'none';
-      submitBtn.disabled = false;
-    }
-  });
 
-  function showAlert(type, msg) {
-    alertEl.textContent = msg;
-    alertEl.className = `alert ${type} show`;
-    if (type === 'error') setTimeout(() => alertEl.classList.remove('show'), 5000);
-  }
-</script>
-</body>
+      // Drag & drop
+      uploadZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadZone.classList.add("drag");
+      });
+      uploadZone.addEventListener("dragleave", () =>
+        uploadZone.classList.remove("drag"),
+      );
+      uploadZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove("drag");
+        const f = e.dataTransfer.files[0];
+        if (!f) return;
+        const dt = new DataTransfer();
+        dt.items.add(f);
+        fileInput.files = dt.files;
+        handleFile();
+      });
+
+      // ── Submit ────────────────────────────────────────────────
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!validateAll()) return;
+
+        spinner.style.display = "inline-block";
+        submitBtn.disabled = true;
+        alertEl.className = "alert";
+
+        try {
+          // ── Build the 3 parts Spring now expects ──
+          // Part 1: "data" — JSON blob of all text fields
+          const dataPayload = {
+            firstName: document.getElementById("firstName").value.trim(),
+            lastName: document.getElementById("lastName").value.trim(),
+            phoneNumber: document.getElementById("phoneNumber").value.trim(),
+            gender: document.getElementById("gender").value,
+            birthday: document.getElementById("birthday").value,
+            bio: document.getElementById("bio").value.trim() || null,
+          };
+
+          const formData = new FormData();
+          formData.append(
+            "data",
+            new Blob([JSON.stringify(dataPayload)], {
+              type: "application/json",
+            }),
+          );
+
+          // Part 2: "profile" — the MultipartFile
+          formData.append("profile", fileInput.files[0]);
+
+          // Part 3: principal is handled automatically by Spring Security — nothing to append.
+
+          const res = await fetch(`${API_BASE}${ENDPOINT}`, {
+            method: "POST",
+            headers: { Accept: "application/json" },
+            credentials: "include", // sends session cookie / JWT cookie
+            body: formData,
+          });
+
+          if (res.status === 401) {
+            showAlert("error", "Session expired — please log in again.");
+            return;
+          }
+
+          const ct = res.headers.get("content-type") || "";
+          const result = ct.includes("application/json")
+            ? await res.json()
+            : { success: false, message: "Unexpected response from server" };
+
+          if (res.ok && result.success) {
+            showAlert("success", result.message || "Profile completed!");
+            if (result.data)
+              localStorage.setItem("userData", JSON.stringify(result.data));
+            setTimeout(() => {
+              window.location.href = "dashboard.html";
+            }, 2000);
+          } else {
+            showAlert(
+              "error",
+              result.message || "Registration failed. Try again.",
+            );
+          }
+        } catch (err) {
+          showAlert("error", `Network error: ${err.message}`);
+        } finally {
+          spinner.style.display = "none";
+          submitBtn.disabled = false;
+        }
+      });
+
+      function showAlert(type, msg) {
+        alertEl.textContent = msg;
+        alertEl.className = `alert ${type} show`;
+        if (type === "error")
+          setTimeout(() => alertEl.classList.remove("show"), 5000);
+      }
+    </script>
+  </body>
 </html>
