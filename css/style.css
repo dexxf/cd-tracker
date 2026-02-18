@@ -1,0 +1,229 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #0d1117;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.login-box {
+  width: 320px;
+  margin: 80px auto;
+  padding: 30px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.github-btn {
+  background: #21262d;
+  color: white;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.github-btn i {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.github-btn:hover {
+  background: #30363d;
+}
+
+.email-btn {
+  background: #e2e5eb;
+  color: black;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.email-btn i {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.email-btn:hover {
+  background: #8c949d;
+}
+
+.email-input {
+  background-color: #8c949d;
+  color: whitesmoke;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.email-input:hover{
+  background-color: #30363d;
+}
+.underline{
+  text-decoration: underline;
+}
+.p{
+  color: gray;
+}
+
+.welcomes{
+  margin-bottom: 0px;
+}
+.comment{
+  margin-top: 0px;
+}
+.below{
+  font-size: 10px;
+}
+
+.welcome-text h1 i.fab {
+  margin-right: 15px;
+  color: #58a6ff;
+  font-size: 50px;
+  vertical-align: middle;
+}
+
+.welcome-text .subtitle {
+  font-size: 16px;
+  color: #c9d1d9;
+  max-width: 500px;
+  margin-top: 10px; /* space below h1 */
+  margin-left: 0;   /* aligns with start of h1 text, not icon */
+}
+.welcome-text {
+  position: absolute;
+  left: 60px;     /* distance from left */
+  top: 100px;      /* distance from top */
+  opacity: 0;
+  animation: slideFadeIn 1.5s ease-out forwards;
+}
+
+.welcome-text h1 {
+  font-size: 50px;
+  margin-bottom: 25px;
+  margin-top: 200px;   /* space below h1 */
+  color: #58a6ff;
+}
+
+
+.welcome-text p {
+  font-size: 16px;
+  color: #c9d1d9;
+  max-width: 320px;
+  margin-top: 0; 
+}
+
+.selection p {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 420px;
+  margin-top: 10px;
+}
+
+.selection p i {
+  color: #3b82f6;
+  margin-top: 4px;
+}
+
+
+.selection .inf {
+  font-size: 25px;
+  margin-bottom: 25px;
+}
+/* Slide from right + fade in */
+@keyframes slideFadeIn {
+  0% {
+    transform: translate(300px, -50%);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  70% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(0, -50%);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+
+
+/* Slide from right + fade in */
+@keyframes slideFadeIn {
+  0% {
+    transform: translate(300px, -50%);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  70% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(0, -50%);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.login-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* This is the electric aura around the box */
+.electric-aura {
+  position: absolute;
+  width: 360px; /* slightly bigger than login-box */
+  height: 380px; /* slightly bigger than login-box */
+  border-radius: 15px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(270deg, #00f, #0ff, #00f, #0ff);
+  background-size: 400% 400%;
+  filter: blur(20px);
+  animation: electricAura 3s linear infinite;
+  z-index: 0; /* behind login box */
+}
+
+.login-box {
+  position: relative;
+  background: #161b22;
+  padding: 30px;
+  width: 320px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  z-index: 1; /* above aura */
+}
+
+/* animation for moving gradient (electric flow) */
+@keyframes electricAura {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+

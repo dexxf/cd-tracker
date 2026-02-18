@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CodeTracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="logo">
+            CodeTracker
+            <span class="subtitle">Classroom Management</span>
+        </div>
+        <div class="profile">
+            <div class="user-info">
+                <strong id="userName">Teacher Name</strong>
+                <small id="userEmail">teacher@example.com</small>
+            </div>
+            <div class="user-icon" id="userIcon">TN</div>
+            
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown" id="profileDropdown">
+                <div class="profile-info">
+                    <strong id="fullName">Full Name</strong>
+                    <small id="username">@username</small>
+                </div>
+                <button class="dropdown-btn" id="editProfileBtn">Edit Profile</button>
+                <button class="dropdown-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard-main">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 id="welcomeMsg">Welcome back, Teacher!</h1>
+            <p>Manage your classrooms and track student progress</p>
+            
+            <div class="action-buttons">
+                <button class="btn create-class" id="createClassBtn">
+                    <i class="fas fa-plus"></i> Create New Class
+                </button>
+                <button class="btn join-class" id="joinClassBtn">
+                    <i class="fas fa-link"></i> Join Class
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs for switching between views -->
+        <div class="tabs-container">
+            <button class="tab-button active" data-tab="created">
+                My Classes <span class="tab-count">0</span>
+            </button>
+            <button class="tab-button" data-tab="joined">
+                Joined Classes <span class="tab-count">0</span>
+            </button>
+        </div>
+
+        <!-- Classroom Grid -->
+        <div class="classroom-grid" id="classroomGrid">
+            <!-- Classes will be loaded here -->
+            <p class="loading-message">Loading your classes...</p>
+        </div>
+    </main>
+
+    <!-- Create Class Modal -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <h2>Create New Class</h2>
+            <p class="shems">Set up your classroom with custom settings</p>
+
+            <div>
+                <label for="classNameInput">Class Name *</label>
+                <input type="text" id="classNameInput" placeholder="e.g., Computer Science 101" required>
+                <span class="field-hint">3-100 characters</span>
+            </div>
+
+            <div>
+                <label for="classDescInput">Description</label>
+                <textarea id="classDescInput" placeholder="Brief description of your class (optional)"></textarea>
+                <span class="field-hint">Maximum 500 characters</span>
+            </div>
+
+            <div>
+                <label for="maxStudentsInput">Maximum Students *</label>
+                <input type="number" id="maxStudentsInput" value="50" min="1" max="100" required>
+                <span class="field-hint">Between 1 and 100 students</span>
+            </div>
+
+            <!-- Passcode Toggle -->
+            <div>
+                <label class="toggle-option" for="passcodeToggle">
+                    <div class="toggle-info">
+                        <strong>Require Passcode</strong>
+                        <small>Students need a passcode to join this class</small>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="passcodeToggle">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </label>
+                
+                <!-- Passcode Input (hidden by default) -->
+                <div id="passcodeSection">
+                    <label for="passcodeInput">Passcode *</label>
+                    <input type="text" id="passcodeInput" placeholder="Enter a secure passcode">
+                    <span class="field-hint">Minimum 8 characters</span>
+                </div>
+            </div>
+
+            <!-- Approval Toggle -->
+            <div>
+                <label class="toggle-option" for="requireApprovalInput">
+                    <div class="toggle-info">
+                        <strong>Require Approval</strong>
+                        <small>Manually approve students before they can join</small>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="requireApprovalInput">
+                        <span class="toggle-slider"></span>
+                    </div>
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn cancel" id="cancelCreate">Cancel</button>
+                <button class="btn primary" id="confirmCreate">Create Class</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Class Modal -->
+    <div class="modal" id="joinModal">
+        <div class="modal-content">
+            <h2>Join a Class</h2>
+            <p class="shems">Enter the class code provided by your teacher</p>
+
+            <div>
+                <label for="classCodeInput">Class Code *</label>
+                <input type="text" id="classCodeInput" placeholder="e.g., ABC123XYZ" required>
+                <span class="field-hint">Enter the unique class code</span>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn cancel" id="cancelJoin">Cancel</button>
+                <button class="btn primary" id="confirmJoin">Join Class</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <h2>Edit Profile</h2>
+            <p class="shems">Update your profile information</p>
+          
+            <div>
+                <label for="editNameInput">Full Name *</label>
+                <input type="text" id="editNameInput" placeholder="Your full name" required>
+            </div>
+
+            <div>
+                <label for="editUsernameInput">Username</label>
+                <input type="text" id="editUsernameInput" placeholder="@username">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn cancel" id="cancelEdit">Cancel</button>
+                <button class="btn primary" id="saveProfileBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script/dashboard.js"></script>
+</body>
+</html>
