@@ -29,11 +29,14 @@ const requireApprovalInput = document.getElementById('requireApprovalInput');
 const classCodeInput = document.getElementById('classCodeInput');
 
 // Tab state
-let currentTab = 'created'; // 'created' or 'joined'
+let currentTab = 'created';
 let classroomsData = {
     created: [],
     joined: []
 };
+
+// Cached profile data
+let currentUser = null;
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,26 +45,95 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
-// Setup event listeners
+// ── Load user profile from API ────────────────────────────────────────────────
+async function loadUserProfile() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/profile`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.replace('index.html');
+                return;
+            }
+            throw new Error(`Failed to fetch profile: ${response.status}`);
+        }
+
+        const data = await response.json();
+        currentUser = data;
+
+        applyProfileToUI(data);
+
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        // Fall back to any cached data
+        const cached = JSON.parse(localStorage.getItem('userData') || '{}');
+        if (cached.firstName) applyProfileToUI(cached);
+    }
+}
+
+function applyProfileToUI(data) {
+    // Resolve field names (API shape vs cached shape)
+    const firstName  = data.firstName  || data.first_name  || '';
+    const lastName   = data.lastName   || data.last_name   || '';
+    const fullName   = `${firstName} ${lastName}`.trim() || 'User';
+    const username   = data.username   || data.githubUsername || '';
+    const email      = data.email      || '';
+    const profileUrl = data.profileUrl || data.avatarUrl   || '';
+
+    // Phone / birthday may be wrapped objects
+    const phone    = data.phoneNumber?.value  || data.phoneNumber  || '';
+    const birthday = data.birthday?.value     || data.birthday     || '';
+    const bio      = data.bio || '';
+    const gender   = data.gender ? capitalise(data.gender) : '';
+
+    // ── Header ──
+    document.getElementById('userName').textContent  = fullName;
+    document.getElementById('userEmail').textContent = email || phone;
+    document.getElementById('welcomeMsg').textContent = `Welcome back, ${firstName || fullName}!`;
+
+    // ── Dropdown ──
+    document.getElementById('fullName').textContent = fullName;
+    document.getElementById('username').textContent = username ? `@${username}` : gender;
+
+    // ── Avatar ──
+    const iconEl = document.getElementById('userIcon');
+    if (profileUrl) {
+        iconEl.innerHTML = `<img src="${profileUrl}" alt="${fullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    } else {
+        iconEl.textContent = getInitials(fullName);
+    }
+
+    // ── Persist for edit-profile pre-fill ──
+    localStorage.setItem('userData', JSON.stringify({
+        fullName, firstName, lastName, username, email,
+        phone, birthday, bio, gender, profileUrl
+    }));
+}
+
+function capitalise(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+// ── Setup event listeners ─────────────────────────────────────────────────────
 function setupEventListeners() {
-    // Modal controls
     createClassBtn.addEventListener('click', () => openModal(createModal));
     joinClassBtn.addEventListener('click', () => openModal(joinModal));
     cancelCreate.addEventListener('click', () => closeModal(createModal));
     cancelJoin.addEventListener('click', () => closeModal(joinModal));
     cancelEdit.addEventListener('click', () => closeModal(editProfileModal));
 
-    // Form submissions
     confirmCreate.addEventListener('click', handleCreateClass);
     confirmJoin.addEventListener('click', handleJoinClass);
     saveProfileBtn.addEventListener('click', handleSaveProfile);
 
-    // Profile dropdown
     userIcon.addEventListener('click', toggleProfileDropdown);
     editProfileBtn.addEventListener('click', openEditProfile);
     logoutBtn.addEventListener('click', handleLogout);
 
-    // Passcode toggle
     passcodeToggle.addEventListener('change', (e) => {
         if (e.target.checked) {
             passcodeSection.style.display = 'block';
@@ -73,22 +145,16 @@ function setupEventListeners() {
         }
     });
 
-    // Tab switching
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('tab-button')) {
-            const tab = e.target.dataset.tab;
-            switchTab(tab);
+            switchTab(e.target.dataset.tab);
         }
     });
 
-    // Close modal when clicking outside
     window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeModal(e.target);
-        }
+        if (e.target.classList.contains('modal')) closeModal(e.target);
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!userIcon.contains(e.target) && !profileDropdown.contains(e.target)) {
             profileDropdown.classList.remove('show');
@@ -96,30 +162,22 @@ function setupEventListeners() {
     });
 }
 
-// Tab switching function
+// ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
     currentTab = tab;
-    
-    // Update tab buttons
     document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.tab === tab) {
-            btn.classList.add('active');
-        }
+        btn.classList.toggle('active', btn.dataset.tab === tab);
     });
-    
-    // Render the appropriate classes
     renderClasses();
 }
 
-// Modal functions
+// ── Modal helpers ─────────────────────────────────────────────────────────────
 function openModal(modal) {
     modal.style.display = 'flex';
 }
 
 function closeModal(modal) {
     modal.style.display = 'none';
-    // Reset form inputs
     if (modal === createModal) {
         classNameInput.value = '';
         classDescInput.value = '';
@@ -134,7 +192,7 @@ function closeModal(modal) {
     }
 }
 
-// Profile functions
+// ── Profile dropdown ──────────────────────────────────────────────────────────
 function toggleProfileDropdown(e) {
     e.stopPropagation();
     profileDropdown.classList.toggle('show');
@@ -149,27 +207,10 @@ function openEditProfile() {
     profileDropdown.classList.remove('show');
 }
 
-function loadUserProfile() {
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    
-    // Update header
-    document.getElementById('userName').textContent = userData.fullName || 'Teacher Name';
-    document.getElementById('userEmail').textContent = userData.email || 'teacher@example.com';
-    document.getElementById('welcomeMsg').textContent = `Welcome back, ${userData.fullName || 'Teacher'}!`;
-    
-    // Update dropdown
-    document.getElementById('fullName').textContent = userData.fullName || 'Full Name';
-    document.getElementById('username').textContent = userData.username || '@username';
-    
-    // Update user icon with initials
-    const initials = getInitials(userData.fullName || 'Teacher');
-    document.getElementById('userIcon').textContent = initials;
-}
-
 function getInitials(name) {
     return name
         .split(' ')
-        .map(word => word[0])
+        .map(w => w[0])
         .join('')
         .toUpperCase()
         .substring(0, 2);
@@ -189,119 +230,66 @@ function handleSaveProfile() {
     userData.username = username;
     localStorage.setItem('userData', JSON.stringify(userData));
 
-    loadUserProfile();
+    // Update UI directly without re-fetching
+    document.getElementById('userName').textContent  = fullName;
+    document.getElementById('fullName').textContent  = fullName;
+    document.getElementById('username').textContent  = username ? `@${username}` : '';
+    document.getElementById('userIcon').textContent  = getInitials(fullName);
+    document.getElementById('welcomeMsg').textContent = `Welcome back, ${fullName.split(' ')[0]}!`;
+
     closeModal(editProfileModal);
     showNotification('Profile updated successfully!', 'success');
 }
 
 function handleLogout() {
     if (confirm('Are you sure you want to log out?')) {
-        localStorage.removeItem('userData');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('accessToken');
+        localStorage.clear();
         window.location.href = 'index.html';
     }
 }
 
-// Create classroom function
+// ── Create classroom ──────────────────────────────────────────────────────────
 async function handleCreateClass() {
-    const name = classNameInput.value.trim();
-    const description = classDescInput.value.trim();
-    const maxStudents = parseInt(maxStudentsInput.value);
-    const hasPasscode = passcodeToggle.checked;
-    const passcode = hasPasscode ? passcodeInput.value.trim() : null;
+    const name          = classNameInput.value.trim();
+    const description   = classDescInput.value.trim();
+    const maxStudents   = parseInt(maxStudentsInput.value);
+    const hasPasscode   = passcodeToggle.checked;
+    const passcode      = hasPasscode ? passcodeInput.value.trim() : null;
     const requireApproval = requireApprovalInput.checked;
 
-    // Validation
-    if (!name) {
-        showNotification('Please enter a class name', 'error');
-        return;
-    }
+    if (!name)                            return showNotification('Please enter a class name', 'error');
+    if (name.length < 3 || name.length > 100) return showNotification('Class name must be 3–100 characters', 'error');
+    if (description && description.length > 500) return showNotification('Description cannot exceed 500 characters', 'error');
+    if (!maxStudents || maxStudents < 1 || maxStudents > 100) return showNotification('Max students must be 1–100', 'error');
+    if (hasPasscode && !passcode)         return showNotification('Please enter a passcode', 'error');
+    if (hasPasscode && passcode.length < 8) return showNotification('Passcode must be at least 8 characters', 'error');
 
-    if (name.length < 3 || name.length > 100) {
-        showNotification('Class name must be between 3 and 100 characters', 'error');
-        return;
-    }
-
-    if (description && description.length > 500) {
-        showNotification('Description cannot exceed 500 characters', 'error');
-        return;
-    }
-
-    if (!maxStudents || maxStudents < 1 || maxStudents > 100) {
-        showNotification('Max students must be between 1 and 100', 'error');
-        return;
-    }
-
-    // Validate passcode if enabled
-    if (hasPasscode) {
-        if (!passcode) {
-            showNotification('Please enter a passcode', 'error');
-            return;
-        }
-        if (passcode.length < 8) {
-            showNotification('Passcode must be at least 8 characters', 'error');
-            return;
-        }
-        if (passcode.length > 100) {
-            showNotification('Passcode cannot exceed 100 characters', 'error');
-            return;
-        }
-    }
-
-    // Disable button to prevent double submission
     confirmCreate.disabled = true;
     confirmCreate.textContent = 'Creating...';
-
-    const requestBody = {
-        name,
-        description: description || null,
-        maxStudents,
-        requireApproval,
-        passcode: passcode || null
-    };
 
     try {
         const response = await fetch(`${API_BASE_URL}/classrooms/create`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({ name, description: description || null, maxStudents, requireApproval, passcode: passcode || null })
         });
 
         const contentType = response.headers.get('content-type');
         let data = null;
-
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType?.includes('application/json')) {
             const text = await response.text();
-            if (text) {
-                try {
-                    data = JSON.parse(text);
-                } catch (parseError) {
-                    throw new Error('Invalid response from server');
-                }
-            }
+            if (text) data = JSON.parse(text);
         }
 
         if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('Authentication failed. Please log in again.');
-            }
-
-            if (response.status === 403) {
-                throw new Error('You do not have permission to create classrooms.');
-            }
-
-            const errorMessage = data?.message || data?.error || `Server error: ${response.status}`;
-            throw new Error(errorMessage);
+            if (response.status === 401) throw new Error('Authentication failed. Please log in again.');
+            if (response.status === 403) throw new Error('You do not have permission to create classrooms.');
+            throw new Error(data?.message || data?.error || `Server error: ${response.status}`);
         }
 
         showNotification('Classroom created successfully!', 'success');
         closeModal(createModal);
-        
-        // Reload classes to show the new classroom
         await loadClasses();
 
     } catch (error) {
@@ -313,14 +301,10 @@ async function handleCreateClass() {
     }
 }
 
-// Join classroom function
+// ── Join classroom ────────────────────────────────────────────────────────────
 async function handleJoinClass() {
     const classCode = classCodeInput.value.trim();
-
-    if (!classCode) {
-        showNotification('Please enter a class code', 'error');
-        return;
-    }
+    if (!classCode) return showNotification('Please enter a class code', 'error');
 
     confirmJoin.disabled = true;
     confirmJoin.textContent = 'Joining...';
@@ -329,7 +313,6 @@ async function handleJoinClass() {
         showNotification('Join classroom feature coming soon!', 'info');
         closeModal(joinModal);
     } catch (error) {
-        console.error('Error joining classroom:', error);
         showNotification('Failed to join classroom. Please try again.', 'error');
     } finally {
         confirmJoin.disabled = false;
@@ -337,100 +320,57 @@ async function handleJoinClass() {
     }
 }
 
-// Load classes function
+// ── Load classes ──────────────────────────────────────────────────────────────
 async function loadClasses() {
-    console.log('=== LOAD CLASSES STARTED ===');
     const container = document.getElementById('classroomGrid');
-    
-    if (!container) {
-        console.error('Classroom grid container not found');
-        return;
-    }
+    if (!container) return;
 
-    // Show loading state
     container.innerHTML = '<p class="loading-message">Loading your classes...</p>';
 
     try {
         const response = await fetch(`${API_BASE_URL}/classrooms/me`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
         });
-
-        console.log('Response status:', response.status);
 
         if (!response.ok) {
             if (response.status === 401) {
                 showNotification('Authentication required. Please log in again.', 'error');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
+                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
                 return;
             }
             throw new Error(`Failed to fetch classrooms: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('RAW API Response:', data);
-        console.log('Response keys:', Object.keys(data));
 
-        // Parse response into created and joined arrays
         let createdClasses = [];
-        let joinedClasses = [];
+        let joinedClasses  = [];
 
-        // Check if data is directly an array
         if (Array.isArray(data)) {
             createdClasses = data;
-        } 
-        // Check various possible property names
-        else if (data) {
-            // Check for created classrooms
-            if (data.createdClassrooms !== undefined) {
-                createdClasses = Array.isArray(data.createdClassrooms) ? data.createdClassrooms : [];
-            } else if (data.created !== undefined) {
-                createdClasses = Array.isArray(data.created) ? data.created : [];
-            } else if (data.owned !== undefined) {
-                createdClasses = Array.isArray(data.owned) ? data.owned : [];
-            } else if (data.classrooms !== undefined) {
-                createdClasses = Array.isArray(data.classrooms) ? data.classrooms : [];
-            } else if (data.data !== undefined) {
-                if (Array.isArray(data.data)) {
-                    createdClasses = data.data;
-                } else if (data.data.classrooms) {
-                    createdClasses = Array.isArray(data.data.classrooms) ? data.data.classrooms : [];
-                } else if (data.data.created) {
-                    createdClasses = Array.isArray(data.data.created) ? data.data.created : [];
-                }
-            }
+        } else if (data) {
+            createdClasses = Array.isArray(data.createdClassrooms) ? data.createdClassrooms
+                           : Array.isArray(data.created)           ? data.created
+                           : Array.isArray(data.owned)             ? data.owned
+                           : Array.isArray(data.classrooms)        ? data.classrooms
+                           : Array.isArray(data.data)              ? data.data
+                           : Array.isArray(data.data?.classrooms)  ? data.data.classrooms
+                           : [];
 
-            // Check for joined classrooms
-            if (data.joinedClassrooms !== undefined) {
-                joinedClasses = Array.isArray(data.joinedClassrooms) ? data.joinedClassrooms : [];
-            } else if (data.joined !== undefined) {
-                joinedClasses = Array.isArray(data.joined) ? data.joined : [];
-            } else if (data.member !== undefined) {
-                joinedClasses = Array.isArray(data.member) ? data.member : [];
-            } else if (data.data && data.data.joined) {
-                joinedClasses = Array.isArray(data.data.joined) ? data.data.joined : [];
-            }
+            joinedClasses  = Array.isArray(data.joinedClassrooms)  ? data.joinedClassrooms
+                           : Array.isArray(data.joined)            ? data.joined
+                           : Array.isArray(data.member)            ? data.member
+                           : Array.isArray(data.data?.joined)      ? data.data.joined
+                           : [];
         }
 
-        console.log('Processed createdClasses:', createdClasses.length);
-        console.log('Processed joinedClasses:', joinedClasses.length);
-
-        // Store data
         classroomsData.created = createdClasses;
-        classroomsData.joined = joinedClasses;
+        classroomsData.joined  = joinedClasses;
 
-        // Update tab counts
         updateTabCounts();
-
-        // Render current tab
         renderClasses();
-
-        console.log('=== LOAD CLASSES COMPLETED ===');
 
     } catch (error) {
         console.error('ERROR in loadClasses:', error);
@@ -439,93 +379,51 @@ async function loadClasses() {
     }
 }
 
-// Update tab counts
+// ── Tab counts ────────────────────────────────────────────────────────────────
 function updateTabCounts() {
     const createdTab = document.querySelector('[data-tab="created"]');
-    const joinedTab = document.querySelector('[data-tab="joined"]');
-    
-    if (createdTab) {
-        const count = classroomsData.created.length;
-        createdTab.innerHTML = `My Classes <span class="tab-count">${count}</span>`;
-    }
-    
-    if (joinedTab) {
-        const count = classroomsData.joined.length;
-        joinedTab.innerHTML = `Joined Classes <span class="tab-count">${count}</span>`;
-    }
+    const joinedTab  = document.querySelector('[data-tab="joined"]');
+    if (createdTab) createdTab.innerHTML = `My Classes <span class="tab-count">${classroomsData.created.length}</span>`;
+    if (joinedTab)  joinedTab.innerHTML  = `Joined Classes <span class="tab-count">${classroomsData.joined.length}</span>`;
 }
 
-// Render classes based on current tab
+// ── Render classes ────────────────────────────────────────────────────────────
 function renderClasses() {
     const container = document.getElementById('classroomGrid');
-    const classes = classroomsData[currentTab];
+    const classes   = classroomsData[currentTab];
     const isCreated = currentTab === 'created';
 
-    console.log(`Rendering ${currentTab} classes:`, classes.length);
-
     if (classes.length === 0) {
-        const emptyMessage = isCreated 
+        const msg = isCreated
             ? 'No classes created yet. Create your first class to get started!'
             : 'You haven\'t joined any classes yet.';
-        container.innerHTML = `<p class="empty-message">${emptyMessage}</p>`;
+        container.innerHTML = `<p class="empty-message">${msg}</p>`;
         return;
     }
 
-    const cardsHTML = classes.map(classroom => createClassCard(classroom, isCreated)).join('');
-    container.innerHTML = cardsHTML;
-
-    // Attach click handlers
+    container.innerHTML = classes.map(c => createClassCard(c, isCreated)).join('');
     attachClassCardHandlers();
 }
 
-// Create class card HTML
 function createClassCard(classroom, isCreated) {
-    // Try multiple possible property names for each field
-    const studentCount = classroom.studentCount || 
-                        classroom.students?.length || 
-                        classroom.enrolledCount || 
-                        classroom.memberCount || 
-                        0;
-    
-    const maxStudents = classroom.maxStudents || 
-                       classroom.capacity || 
-                       classroom.maxCapacity || 
-                       50;
-    
-    const classCode = classroom.classCode || 
-                     classroom.code || 
-                     classroom.inviteCode || 
-                     classroom.id || 
-                     'N/A';
-    
-    const description = classroom.description || 
-                       classroom.desc || 
-                       'No description provided';
-    
-    const hasPasscode = classroom.hasPasscode || 
-                       classroom.requiresPasscode || 
-                       classroom.passcode || 
-                       classroom.isPasswordProtected || 
-                       false;
-    
-    const requireApproval = classroom.requireApproval || 
-                           classroom.requiresApproval || 
-                           classroom.needsApproval || 
-                           classroom.manualApproval || 
-                           false;
-
-    const classId = classroom.id || classroom.classroomId || classroom._id || 'unknown';
-    const className = classroom.name || classroom.title || classroom.className || 'Unnamed Class';
+    const studentCount  = classroom.studentCount  || classroom.students?.length || classroom.enrolledCount || classroom.memberCount || 0;
+    const maxStudents   = classroom.maxStudents   || classroom.capacity || 50;
+    const classCode     = classroom.classCode     || classroom.code || classroom.inviteCode || classroom.id || 'N/A';
+    const description   = classroom.description   || classroom.desc || 'No description provided';
+    const hasPasscode   = !!(classroom.hasPasscode || classroom.requiresPasscode || classroom.passcode || classroom.isPasswordProtected);
+    const requireApproval = !!(classroom.requireApproval || classroom.requiresApproval || classroom.needsApproval || classroom.manualApproval);
+    const classId       = classroom.id || classroom.classroomId || classroom._id || 'unknown';
+    const className     = classroom.name || classroom.title || classroom.className || 'Unnamed Class';
 
     return `
         <div class="class-card" data-class-id="${classId}" data-is-created="${isCreated}">
             <div class="class-card-header">
                 <h4 class="class-name">${escapeHtml(className)}</h4>
-                ${isCreated ? '<span class="badge badge-owner">Owner</span>' : '<span class="badge badge-member">Member</span>'}
+                ${isCreated
+                    ? '<span class="badge badge-owner">Owner</span>'
+                    : '<span class="badge badge-member">Member</span>'}
             </div>
-            
             <p class="class-description">${escapeHtml(description)}</p>
-            
             <div class="class-info">
                 <div class="info-item">
                     <i class="fas fa-users"></i>
@@ -536,129 +434,67 @@ function createClassCard(classroom, isCreated) {
                     <span>Code: <strong>${classCode}</strong></span>
                 </div>
             </div>
-
             ${hasPasscode || requireApproval ? `
                 <div class="class-settings">
-                    ${hasPasscode ? '<span class="setting-badge"><i class="fas fa-lock"></i> Passcode</span>' : ''}
+                    ${hasPasscode     ? '<span class="setting-badge"><i class="fas fa-lock"></i> Passcode</span>' : ''}
                     ${requireApproval ? '<span class="setting-badge"><i class="fas fa-user-check"></i> Approval</span>' : ''}
-                </div>
-            ` : ''}
-            
+                </div>` : ''}
             <div class="class-actions">
-                <button class="btn btn-primary view-class" data-class-id="${classId}">
-                    View Class
-                </button>
-                ${isCreated ? `
-                    <button class="btn btn-secondary manage-class" data-class-id="${classId}">
-                        Manage
-                    </button>
-                ` : ''}
+                <button class="btn btn-primary view-class" data-class-id="${classId}">View Class</button>
+                ${isCreated ? `<button class="btn btn-secondary manage-class" data-class-id="${classId}">Manage</button>` : ''}
             </div>
         </div>
     `;
 }
 
-// Escape HTML to prevent XSS
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Attach event handlers to class cards
 function attachClassCardHandlers() {
-    // View class buttons
-    document.querySelectorAll('.view-class').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const classId = e.target.dataset.classId;
-            viewClassroom(classId);
-        });
+    document.querySelectorAll('.view-class').forEach(btn => {
+        btn.addEventListener('click', e => viewClassroom(e.target.dataset.classId));
     });
-
-    // Manage class buttons
-    document.querySelectorAll('.manage-class').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const classId = e.target.dataset.classId;
-            manageClassroom(classId);
-        });
+    document.querySelectorAll('.manage-class').forEach(btn => {
+        btn.addEventListener('click', e => manageClassroom(e.target.dataset.classId));
     });
 }
 
-// Navigate to classroom view
 function viewClassroom(classId) {
-    console.log('Viewing classroom:', classId);
     window.location.href = `classroom.html?id=${classId}`;
 }
 
-// Navigate to classroom management
 function manageClassroom(classId) {
-    console.log('Managing classroom:', classId);
     window.location.href = `manage-classroom.html?id=${classId}`;
 }
 
-// Notification system
+// ── Notifications ─────────────────────────────────────────────────────────────
 function showNotification(message, type = 'info') {
-    const existing = document.querySelector('.notification');
-    if (existing) {
-        existing.remove();
-    }
+    document.querySelector('.notification')?.remove();
 
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 500;
-        z-index: 10000;
-        animation: slideIn 0.3s ease-out;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        max-width: 400px;
+    const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6', warning: '#f59e0b' };
+    const n = document.createElement('div');
+    n.className = `notification notification-${type}`;
+    n.textContent = message;
+    n.style.cssText = `
+        position:fixed;top:20px;right:20px;padding:15px 20px;border-radius:8px;
+        color:#fff;font-weight:500;z-index:10000;animation:slideIn .3s ease-out;
+        box-shadow:0 4px 12px rgba(0,0,0,.15);max-width:400px;
+        background-color:${colors[type] || colors.info};
     `;
-
-    const colors = {
-        success: '#10b981',
-        error: '#ef4444',
-        info: '#3b82f6',
-        warning: '#f59e0b'
-    };
-
-    notification.style.backgroundColor = colors[type] || colors.info;
-    document.body.appendChild(notification);
-
+    document.body.appendChild(n);
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-in';
-        setTimeout(() => notification.remove(), 300);
+        n.style.animation = 'slideOut .3s ease-in';
+        setTimeout(() => n.remove(), 300);
     }, 3000);
 }
 
-// Add animation styles
+// ── Animation styles ──────────────────────────────────────────────────────────
 const style = document.createElement('style');
 style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
+    @keyframes slideIn  { from { transform:translateX(400px);opacity:0 } to { transform:translateX(0);opacity:1 } }
+    @keyframes slideOut { from { transform:translateX(0);opacity:1 } to { transform:translateX(400px);opacity:0 } }
 `;
 document.head.appendChild(style);
