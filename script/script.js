@@ -5,13 +5,14 @@ const BACKEND_ORIGIN = "http://localhost:8080";
 // Check if user is already authenticated on page load
 (async function checkAuth() {
   try {
-    const response = await fetch("http://localhost:8080/api/users/me", {
+    const response = await fetch("http://localhost:8080/api/auth/check", {
       method: "GET",
       credentials: "include",
     });
 
-    if (response.ok) {
-      // User is authenticated — redirect to dashboard
+    const data = await response.json();
+
+    if (data.authenticated == true) {
       window.location.replace("/dashboard.html");
       return;
     }
