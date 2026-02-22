@@ -23,7 +23,7 @@
                 <strong id="userName">Teacher Name</strong>
                 <small id="userEmail">teacher@example.com</small>
             </div>
-            <imgS src="https://res.cloudinary.com/ddat40irn/image/upload/v1771459844/user-profile/usr-4487f331-c5bf-4d9a-bdaf-5a0c5bb3b779.jpg" id="userIcon">TN</img>
+            <div class="user-icon" id="userIcon"></div>
             
             <!-- Profile Dropdown -->
             <div class="profile-dropdown" id="profileDropdown">
@@ -31,8 +31,33 @@
                     <strong id="fullName">Full Name</strong>
                     <small id="username">@username</small>
                 </div>
-                <button class="dropdown-btn" id="editProfileBtn">Edit Profile</button>
+                <button class="dropdown-btn" id="editProfileBtn">Profile</button>
                 <button class="dropdown-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <!-- Profile View Container -->
+        <div class="profile-container" id="profileContainer">
+            <div class="profile-card">
+
+                <div class="profile-header">
+                    <div id="profileAvatar"></div>
+                    <h2 id="profileFullName"></h2>
+                    <p id="profileUsername"></p>
+                </div>
+
+                <div class="profile-body">
+                    <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+                    <p><strong>Phone:</strong> <span id="profilePhone"></span></p>
+                    <p><strong>Birthday:</strong> <span id="profileBirthday"></span></p>
+                    <p><strong>Bio:</strong> <span id="profileBio"></span></p>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="btn primary" id="updateProfileBtn">Update</button>
+                    <button class="btn cancel" id="cancelProfileView">Cancel</button>
+                </div>
+
             </div>
         </div>
     </header>
@@ -157,27 +182,58 @@
     </div>
 
     <!-- Edit Profile Modal -->
-    <div class="modal" id="editProfileModal">
-        <div class="modal-content">
-            <h2>Edit Profile</h2>
-            <p class="shems">Update your profile information</p>
-          
-            <div>
-                <label for="editNameInput">Full Name *</label>
-                <input type="text" id="editNameInput" placeholder="Your full name" required>
-            </div>
+    <!-- Edit Profile Modal -->
+<div class="modal" id="editProfileModal">
+    <div class="modal-content">
+        <h2>Profile</h2>
+        <p class="shems">Update your profile information</p>
 
-            <div>
-                <label for="editUsernameInput">Username</label>
-                <input type="text" id="editUsernameInput" placeholder="@username">
-            </div>
+        <div>
+            <label for="editFirstNameInput">First Name *</label>
+            <input type="text" id="editFirstNameInput" placeholder="Your first name" required>
+        </div>
 
-            <div class="modal-actions">
-                <button class="btn cancel" id="cancelEdit">Cancel</button>
-                <button class="btn primary" id="saveProfileBtn">Save Changes</button>
-            </div>
+        <div>
+            <label for="editLastNameInput">Last Name *</label>
+            <input type="text" id="editLastNameInput" placeholder="Your last name" required>
+        </div>
+
+        <div>
+            <label for="editUsernameInput">Username</label>
+            <input type="text" id="editUsernameInput" placeholder="@username">
+        </div>
+
+        <div>
+            <label for="editPhoneInput">Phone Number *</label>
+            <input type="text" id="editPhoneInput" placeholder="e.g., +639171234567" required>
+        </div>
+
+        <div>
+            <label for="editGenderInput">Gender *</label>
+            <select id="editGenderInput" required>
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="editBirthdayInput">Birthday *</label>
+            <input type="date" id="editBirthdayInput" required>
+        </div>
+
+        <div>
+            <label for="editBioInput">Bio</label>
+            <textarea id="editBioInput" placeholder="Tell something about yourself (optional)"></textarea>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn cancel" id="cancelEdit">Cancel</button>
+            <button class="btn primary" id="saveProfileBtn">Save Changes</button>
         </div>
     </div>
+</div>
 
     <script src="script/dashboard.js"></script>
 </body>

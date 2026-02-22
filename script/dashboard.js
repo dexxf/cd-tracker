@@ -216,29 +216,51 @@ function getInitials(name) {
         .substring(0, 2);
 }
 
-function handleSaveProfile() {
-    const fullName = document.getElementById('editNameInput').value.trim();
-    const username = document.getElementById('editUsernameInput').value.trim();
+async function handleSaveProfile() {
+    const firstName = document.getElementById('editFirstNameInput').value.trim();
+    const lastName = document.getElementById('editLastNameInput').value.trim();
+    const phoneNumber = document.getElementById('editPhoneInput').value.trim();
+    const gender = document.getElementById('editGenderInput').value.trim();
+    const birthday = document.getElementById('editBirthdayInput').value;
+    const bio = document.getElementById('editBioInput').value.trim();
 
-    if (!fullName) {
-        alert('Please enter your full name');
+    if (!firstName || !lastName || !phoneNumber || !gender || !birthday) {
+        showNotification('Please fill all required fields', 'error');
         return;
     }
 
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    userData.fullName = fullName;
-    userData.username = username;
-    localStorage.setItem('userData', JSON.stringify(userData));
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                firstName,
+                lastName,
+                phoneNumber,
+                gender,
+                birthday,
+                bio
+            })
+        });
 
-    // Update UI directly without re-fetching
-    document.getElementById('userName').textContent  = fullName;
-    document.getElementById('fullName').textContent  = fullName;
-    document.getElementById('username').textContent  = username ? `@${username}` : '';
-    document.getElementById('userIcon').textContent  = getInitials(fullName);
-    document.getElementById('welcomeMsg').textContent = `Welcome back, ${fullName.split(' ')[0]}!`;
+        const data = await response.json();
 
-    closeModal(editProfileModal);
-    showNotification('Profile updated successfully!', 'success');
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to update profile');
+        }
+
+        showNotification('Profile updated successfully!', 'success');
+
+        closeModal(editProfileModal);
+        await loadUserProfile(); // re-fetch real data from backend
+
+    } catch (error) {
+        console.error(error);
+        showNotification(error.message || 'Update failed', 'error');
+    }
 }
 
 function handleLogout() {
