@@ -2,50 +2,73 @@
 const API_BASE_URL = 'http://localhost:8080/api';
 
 // DOM Elements
-const createClassBtn = document.getElementById('createClassBtn');
-const joinClassBtn = document.getElementById('joinClassBtn');
-const createModal = document.getElementById('createModal');
-const joinModal = document.getElementById('joinModal');
-const editProfileModal = document.getElementById('editProfileModal');
-const confirmCreate = document.getElementById('confirmCreate');
-const confirmJoin = document.getElementById('confirmJoin');
-const cancelCreate = document.getElementById('cancelCreate');
-const cancelJoin = document.getElementById('cancelJoin');
-const userIcon = document.getElementById('userIcon');
-const profileDropdown = document.getElementById('profileDropdown');
-const editProfileBtn = document.getElementById('editProfileBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const cancelEdit = document.getElementById('cancelEdit');
-const saveProfileBtn = document.getElementById('saveProfileBtn');
+const createClassBtn       = document.getElementById('createClassBtn');
+const joinClassBtn         = document.getElementById('joinClassBtn');
+const createModal          = document.getElementById('createModal');
+const joinModal            = document.getElementById('joinModal');
+const editProfileModal     = document.getElementById('editProfileModal');
+const confirmCreate        = document.getElementById('confirmCreate');
+const confirmJoin          = document.getElementById('confirmJoin');
+const cancelCreate         = document.getElementById('cancelCreate');
+const cancelJoin           = document.getElementById('cancelJoin');
+const userIcon             = document.getElementById('userIcon');
+const profileDropdown      = document.getElementById('profileDropdown');
+const editProfileBtn       = document.getElementById('editProfileBtn');
+const logoutBtn            = document.getElementById('logoutBtn');
+const cancelEdit           = document.getElementById('cancelEdit');
+const saveProfileBtn       = document.getElementById('saveProfileBtn');
 
 // Form inputs
-const classNameInput = document.getElementById('classNameInput');
-const classDescInput = document.getElementById('classDescInput');
-const maxStudentsInput = document.getElementById('maxStudentsInput');
-const passcodeToggle = document.getElementById('passcodeToggle');
-const passcodeSection = document.getElementById('passcodeSection');
-const passcodeInput = document.getElementById('passcodeInput');
+const classNameInput       = document.getElementById('classNameInput');
+const classDescInput       = document.getElementById('classDescInput');
+const maxStudentsInput     = document.getElementById('maxStudentsInput');
+const passcodeToggle       = document.getElementById('passcodeToggle');
+const passcodeSection      = document.getElementById('passcodeSection');
+const passcodeInput        = document.getElementById('passcodeInput');
 const requireApprovalInput = document.getElementById('requireApprovalInput');
-const classCodeInput = document.getElementById('classCodeInput');
+const classCodeInput       = document.getElementById('classCodeInput');
 
 // Tab state
 let currentTab = 'created';
-let classroomsData = {
-    created: [],
-    joined: []
-};
+let classroomsData = { created: [], joined: [] };
 
-// Cached profile data
+// Current user
 let currentUser = null;
 
-// Initialize dashboard
+// ── Initialize ────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     loadUserProfile();
     loadClasses();
     setupEventListeners();
 });
 
-// ── Load user profile from API ────────────────────────────────────────────────
+// ── Value object unwrapper ────────────────────────────────────────────────────
+// Backend returns Gender, PhoneNumber, Birthday as value objects — unwrap them
+function unwrap(val) {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'object') {
+        return val.value ?? val.number ?? val.date ?? val.name ?? '';
+    }
+    return String(val);
+}
+
+function capitalise(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+function getInitials(name) {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0, 2);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ── Load user profile — GET /api/users/profile ────────────────────────────────
 async function loadUserProfile() {
     try {
         const response = await fetch(`${API_BASE_URL}/users/profile`, {
@@ -63,40 +86,30 @@ async function loadUserProfile() {
 
         const data = await response.json();
         currentUser = data;
-
         applyProfileToUI(data);
 
     } catch (error) {
         console.error('Error loading profile:', error);
-        // Fall back to any cached data
-        const cached = JSON.parse(localStorage.getItem('userData') || '{}');
-        if (cached.firstName) applyProfileToUI(cached);
     }
 }
 
+// ── Apply FetchProfileDataResponse to UI ──────────────────────────────────────
 function applyProfileToUI(data) {
-    // Resolve field names (API shape vs cached shape)
-    const firstName  = data.firstName  || data.first_name  || '';
-    const lastName   = data.lastName   || data.last_name   || '';
+    const firstName  = data.firstName || '';
+    const lastName   = data.lastName  || '';
     const fullName   = `${firstName} ${lastName}`.trim() || 'User';
-    const username   = data.username   || data.githubUsername || '';
-    const email      = data.email      || '';
-    const profileUrl = data.profileUrl || data.avatarUrl   || '';
+    const profileUrl = data.profileUrl || '';
 
-    // Phone / birthday may be wrapped objects
-    const phone    = data.phoneNumber?.value  || data.phoneNumber  || '';
-    const birthday = data.birthday?.value     || data.birthday     || '';
-    const bio      = data.bio || '';
-    const gender   = data.gender ? capitalise(data.gender) : '';
+    // Value objects
+    const gender   = capitalise(unwrap(data.gender));
 
     // ── Header ──
-    document.getElementById('userName').textContent  = fullName;
-    document.getElementById('userEmail').textContent = email || phone;
+    document.getElementById('userName').textContent   = fullName;
     document.getElementById('welcomeMsg').textContent = `Welcome back, ${firstName || fullName}!`;
 
     // ── Dropdown ──
     document.getElementById('fullName').textContent = fullName;
-    document.getElementById('username').textContent = username ? `@${username}` : gender;
+    document.getElementById('username').textContent = gender;
 
     // ── Avatar ──
     const iconEl = document.getElementById('userIcon');
@@ -105,17 +118,6 @@ function applyProfileToUI(data) {
     } else {
         iconEl.textContent = getInitials(fullName);
     }
-
-    // ── Persist for edit-profile pre-fill ──
-    localStorage.setItem('userData', JSON.stringify({
-        fullName, firstName, lastName, username, email,
-        phone, birthday, bio, gender, profileUrl
-    }));
-}
-
-function capitalise(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
 // ── Setup event listeners ─────────────────────────────────────────────────────
@@ -179,13 +181,13 @@ function openModal(modal) {
 function closeModal(modal) {
     modal.style.display = 'none';
     if (modal === createModal) {
-        classNameInput.value = '';
-        classDescInput.value = '';
-        maxStudentsInput.value = '50';
-        passcodeToggle.checked = false;
+        classNameInput.value       = '';
+        classDescInput.value       = '';
+        maxStudentsInput.value     = '50';
+        passcodeToggle.checked     = false;
         passcodeSection.style.display = 'none';
-        passcodeInput.value = '';
-        passcodeInput.required = false;
+        passcodeInput.value        = '';
+        passcodeInput.required     = false;
         requireApprovalInput.checked = false;
     } else if (modal === joinModal) {
         classCodeInput.value = '';
@@ -198,52 +200,60 @@ function toggleProfileDropdown(e) {
     profileDropdown.classList.toggle('show');
 }
 
-function openEditProfile() {
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-    document.getElementById('editNameInput').value = userData.fullName || '';
-    document.getElementById('editUsernameInput').value = userData.username || '';
-    closeModal(editProfileModal);
-    openModal(editProfileModal);
+// ── Open edit profile — GET /api/users/profile ────────────────────────────────
+async function openEditProfile() {
     profileDropdown.classList.remove('show');
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/profile`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch profile');
+
+        const data = await response.json();
+
+        // Unwrap value objects before populating form
+        document.getElementById('editFirstNameInput').value = data.firstName           || '';
+        document.getElementById('editLastNameInput').value  = data.lastName            || '';
+        document.getElementById('editPhoneInput').value     = unwrap(data.phoneNumber) || '';
+        document.getElementById('editGenderInput').value    = unwrap(data.gender)      || '';
+        document.getElementById('editBirthdayInput').value  = unwrap(data.birthday)    || '';
+        document.getElementById('editBioInput').value       = data.bio                 || '';
+
+    } catch (error) {
+        console.error('Error fetching profile for edit:', error);
+        showNotification('Failed to load profile data', 'error');
+        return;
+    }
+
+    openModal(editProfileModal);
 }
 
-function getInitials(name) {
-    return name
-        .split(' ')
-        .map(w => w[0])
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
-}
-
+// ── Save profile — PUT /api/users/profile ─────────────────────────────────────
 async function handleSaveProfile() {
-    const firstName = document.getElementById('editFirstNameInput').value.trim();
-    const lastName = document.getElementById('editLastNameInput').value.trim();
+    const firstName   = document.getElementById('editFirstNameInput').value.trim();
+    const lastName    = document.getElementById('editLastNameInput').value.trim();
     const phoneNumber = document.getElementById('editPhoneInput').value.trim();
-    const gender = document.getElementById('editGenderInput').value.trim();
-    const birthday = document.getElementById('editBirthdayInput').value;
-    const bio = document.getElementById('editBioInput').value.trim();
+    const gender      = document.getElementById('editGenderInput').value.trim();
+    const birthday    = document.getElementById('editBirthdayInput').value;
+    const bio         = document.getElementById('editBioInput').value;
 
     if (!firstName || !lastName || !phoneNumber || !gender || !birthday) {
         showNotification('Please fill all required fields', 'error');
         return;
     }
 
+    saveProfileBtn.disabled     = true;
+    saveProfileBtn.textContent  = 'Saving...';
+
     try {
         const response = await fetch(`${API_BASE_URL}/users/profile`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({
-                firstName,
-                lastName,
-                phoneNumber,
-                gender,
-                birthday,
-                bio
-            })
+            body: JSON.stringify({ firstName, lastName, phoneNumber, gender, birthday, bio})
         });
 
         const data = await response.json();
@@ -253,16 +263,19 @@ async function handleSaveProfile() {
         }
 
         showNotification('Profile updated successfully!', 'success');
-
         closeModal(editProfileModal);
-        await loadUserProfile(); // re-fetch real data from backend
+        await loadUserProfile();
 
     } catch (error) {
         console.error(error);
         showNotification(error.message || 'Update failed', 'error');
+    } finally {
+        saveProfileBtn.disabled    = false;
+        saveProfileBtn.textContent = 'Save Changes';
     }
 }
 
+// ── Logout ────────────────────────────────────────────────────────────────────
 function handleLogout() {
     if (confirm('Are you sure you want to log out?')) {
         localStorage.clear();
@@ -272,29 +285,35 @@ function handleLogout() {
 
 // ── Create classroom ──────────────────────────────────────────────────────────
 async function handleCreateClass() {
-    const name          = classNameInput.value.trim();
-    const description   = classDescInput.value.trim();
-    const maxStudents   = parseInt(maxStudentsInput.value);
-    const hasPasscode   = passcodeToggle.checked;
-    const passcode      = hasPasscode ? passcodeInput.value.trim() : null;
+    const name            = classNameInput.value.trim();
+    const description     = classDescInput.value.trim();
+    const maxStudents     = parseInt(maxStudentsInput.value);
+    const hasPasscode     = passcodeToggle.checked;
+    const passcode        = hasPasscode ? passcodeInput.value.trim() : null;
     const requireApproval = requireApprovalInput.checked;
 
-    if (!name)                            return showNotification('Please enter a class name', 'error');
-    if (name.length < 3 || name.length > 100) return showNotification('Class name must be 3–100 characters', 'error');
+    if (!name)                                   return showNotification('Please enter a class name', 'error');
+    if (name.length < 3 || name.length > 100)    return showNotification('Class name must be 3–100 characters', 'error');
     if (description && description.length > 500) return showNotification('Description cannot exceed 500 characters', 'error');
     if (!maxStudents || maxStudents < 1 || maxStudents > 100) return showNotification('Max students must be 1–100', 'error');
-    if (hasPasscode && !passcode)         return showNotification('Please enter a passcode', 'error');
-    if (hasPasscode && passcode.length < 8) return showNotification('Passcode must be at least 8 characters', 'error');
+    if (hasPasscode && !passcode)                return showNotification('Please enter a passcode', 'error');
+    if (hasPasscode && passcode.length < 8)      return showNotification('Passcode must be at least 8 characters', 'error');
 
-    confirmCreate.disabled = true;
-    confirmCreate.textContent = 'Creating...';
+    confirmCreate.disabled     = true;
+    confirmCreate.textContent  = 'Creating...';
 
     try {
         const response = await fetch(`${API_BASE_URL}/classrooms/create`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ name, description: description || null, maxStudents, requireApproval, passcode: passcode || null })
+            body: JSON.stringify({
+                name,
+                description: description || null,
+                maxStudents,
+                requireApproval,
+                passcode: passcode || null
+            })
         });
 
         const contentType = response.headers.get('content-type');
@@ -318,7 +337,7 @@ async function handleCreateClass() {
         console.error('Error creating classroom:', error);
         showNotification(error.message || 'Failed to create classroom. Please try again.', 'error');
     } finally {
-        confirmCreate.disabled = false;
+        confirmCreate.disabled    = false;
         confirmCreate.textContent = 'Create Class';
     }
 }
@@ -328,7 +347,7 @@ async function handleJoinClass() {
     const classCode = classCodeInput.value.trim();
     if (!classCode) return showNotification('Please enter a class code', 'error');
 
-    confirmJoin.disabled = true;
+    confirmJoin.disabled    = true;
     confirmJoin.textContent = 'Joining...';
 
     try {
@@ -337,12 +356,12 @@ async function handleJoinClass() {
     } catch (error) {
         showNotification('Failed to join classroom. Please try again.', 'error');
     } finally {
-        confirmJoin.disabled = false;
+        confirmJoin.disabled    = false;
         confirmJoin.textContent = 'Join Class';
     }
 }
 
-// ── Load classes ──────────────────────────────────────────────────────────────
+// ── Load classes — GET /api/classrooms/me ─────────────────────────────────────
 async function loadClasses() {
     const container = document.getElementById('classroomGrid');
     if (!container) return;
@@ -352,7 +371,6 @@ async function loadClasses() {
     try {
         const response = await fetch(`${API_BASE_URL}/classrooms/me`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
         });
 
@@ -418,7 +436,7 @@ function renderClasses() {
     if (classes.length === 0) {
         const msg = isCreated
             ? 'No classes created yet. Create your first class to get started!'
-            : 'You haven\'t joined any classes yet.';
+            : "You haven't joined any classes yet.";
         container.innerHTML = `<p class="empty-message">${msg}</p>`;
         return;
     }
@@ -428,17 +446,17 @@ function renderClasses() {
 }
 
 function createClassCard(classroom, isCreated) {
-    const studentCount  = classroom.studentCount  || classroom.students?.length || classroom.enrolledCount || classroom.memberCount || 0;
-    const maxStudents   = classroom.maxStudents   || classroom.capacity || 50;
-    const classCode     = classroom.classCode     || classroom.code || classroom.inviteCode || classroom.id || 'N/A';
-    const description   = classroom.description   || classroom.desc || 'No description provided';
-    const hasPasscode   = !!(classroom.hasPasscode || classroom.requiresPasscode || classroom.passcode || classroom.isPasswordProtected);
+    const studentCount    = classroom.studentCount  || classroom.students?.length || classroom.enrolledCount || classroom.memberCount || 0;
+    const maxStudents     = classroom.maxStudents   || classroom.capacity || 50;
+    const classCode       = classroom.classCode     || classroom.code || classroom.inviteCode || classroom.id || 'N/A';
+    const description     = classroom.description   || classroom.desc || 'No description provided';
+    const hasPasscode     = !!(classroom.hasPasscode || classroom.requiresPasscode || classroom.passcode || classroom.isPasswordProtected);
     const requireApproval = !!(classroom.requireApproval || classroom.requiresApproval || classroom.needsApproval || classroom.manualApproval);
-    const classId       = classroom.id || classroom.classroomId || classroom._id || 'unknown';
-    const className     = classroom.name || classroom.title || classroom.className || 'Unnamed Class';
+    const classId         = classroom.id || classroom.classroomId || classroom._id || 'unknown';
+    const className       = classroom.name || classroom.title || classroom.className || 'Unnamed Class';
 
     return `
-        <div class="class-card" data-class-id="${classId}" data-is-created="${isCreated}">
+        <div class="class-card" data-class-id="${classId}">
             <div class="class-card-header">
                 <h4 class="class-name">${escapeHtml(className)}</h4>
                 ${isCreated
@@ -453,12 +471,12 @@ function createClassCard(classroom, isCreated) {
                 </div>
                 <div class="info-item">
                     <i class="fas fa-code"></i>
-                    <span>Code: <strong>${classCode}</strong></span>
+                    <span>Code: <strong>${escapeHtml(String(classCode))}</strong></span>
                 </div>
             </div>
             ${hasPasscode || requireApproval ? `
                 <div class="class-settings">
-                    ${hasPasscode     ? '<span class="setting-badge"><i class="fas fa-lock"></i> Passcode</span>' : ''}
+                    ${hasPasscode     ? '<span class="setting-badge"><i class="fas fa-lock"></i> Passcode</span>'        : ''}
                     ${requireApproval ? '<span class="setting-badge"><i class="fas fa-user-check"></i> Approval</span>' : ''}
                 </div>` : ''}
             <div class="class-actions">
@@ -467,12 +485,6 @@ function createClassCard(classroom, isCreated) {
             </div>
         </div>
     `;
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 function attachClassCardHandlers() {

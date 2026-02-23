@@ -8,67 +8,48 @@
     <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
-    <!-- Header -->
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
     <header class="dashboard-header">
         <div class="logo">
             <i class="fa-brands fa-github"></i>
-                <div class="logo-text">
-                    CodeTracker
-                    <span class="subtitle">Classroom Management</span>
-                </div>
+            <div class="logo-text">
+                CodeTracker
+                <span class="subtitle">Classroom Management</span>
+            </div>
         </div>
 
         <div class="profile">
             <div class="user-info">
-                <strong id="userName">Teacher Name</strong>
-                <small id="userEmail">teacher@example.com</small>
+                <strong id="userName">Loading...</strong>
             </div>
+
             <div class="user-icon" id="userIcon"></div>
-            
+
             <!-- Profile Dropdown -->
             <div class="profile-dropdown" id="profileDropdown">
                 <div class="profile-info">
-                    <strong id="fullName">Full Name</strong>
-                    <small id="username">@username</small>
+                    <strong id="fullName"></strong>
+                    <small id="username"></small>
                 </div>
-                <button class="dropdown-btn" id="editProfileBtn">Profile</button>
-                <button class="dropdown-btn" id="logoutBtn">Logout</button>
-            </div>
-        </div>
-
-        <!-- Profile View Container -->
-        <div class="profile-container" id="profileContainer">
-            <div class="profile-card">
-
-                <div class="profile-header">
-                    <div id="profileAvatar"></div>
-                    <h2 id="profileFullName"></h2>
-                    <p id="profileUsername"></p>
-                </div>
-
-                <div class="profile-body">
-                    <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-                    <p><strong>Phone:</strong> <span id="profilePhone"></span></p>
-                    <p><strong>Birthday:</strong> <span id="profileBirthday"></span></p>
-                    <p><strong>Bio:</strong> <span id="profileBio"></span></p>
-                </div>
-
-                <div class="profile-actions">
-                    <button class="btn primary" id="updateProfileBtn">Update</button>
-                    <button class="btn cancel" id="cancelProfileView">Cancel</button>
-                </div>
-
+                <button class="dropdown-btn" id="editProfileBtn">
+                    <i class="fas fa-user-pen"></i> Edit Profile
+                </button>
+                <button class="dropdown-btn" id="logoutBtn">
+                    <i class="fas fa-right-from-bracket"></i> Logout
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Dashboard -->
+    <!-- ── Main ───────────────────────────────────────────────────────────── -->
     <main class="dashboard-main">
-        <!-- Welcome Section -->
+
+        <!-- Welcome -->
         <div class="welcome-section">
-            <h1 id="welcomeMsg">Welcome back, Teacher!</h1>
+            <h1 id="welcomeMsg">Welcome back!</h1>
             <p>Manage your classrooms and track student progress</p>
-            
+
             <div class="action-buttons">
                 <button class="btn create-class" id="createClassBtn">
                     <i class="fas fa-plus"></i> Create New Class
@@ -79,7 +60,7 @@
             </div>
         </div>
 
-        <!-- Tabs for switching between views -->
+        <!-- Tabs -->
         <div class="tabs-container">
             <button class="tab-button active" data-tab="created">
                 My Classes <span class="tab-count">0</span>
@@ -91,12 +72,12 @@
 
         <!-- Classroom Grid -->
         <div class="classroom-grid" id="classroomGrid">
-            <!-- Classes will be loaded here -->
             <p class="loading-message">Loading your classes...</p>
         </div>
+
     </main>
 
-    <!-- Create Class Modal -->
+    <!-- ── Create Class Modal ─────────────────────────────────────────────── -->
     <div class="modal" id="createModal">
         <div class="modal-content">
             <h2>Create New Class</h2>
@@ -105,7 +86,7 @@
             <div>
                 <label for="classNameInput">Class Name *</label>
                 <input type="text" id="classNameInput" placeholder="e.g., Computer Science 101" required>
-                <span class="field-hint">3-100 characters</span>
+                <span class="field-hint">3–100 characters</span>
             </div>
 
             <div>
@@ -120,7 +101,6 @@
                 <span class="field-hint">Between 1 and 100 students</span>
             </div>
 
-            <!-- Passcode Toggle -->
             <div>
                 <label class="toggle-option" for="passcodeToggle">
                     <div class="toggle-info">
@@ -132,8 +112,6 @@
                         <span class="toggle-slider"></span>
                     </div>
                 </label>
-                
-                <!-- Passcode Input (hidden by default) -->
                 <div id="passcodeSection">
                     <label for="passcodeInput">Passcode *</label>
                     <input type="text" id="passcodeInput" placeholder="Enter a secure passcode">
@@ -141,7 +119,6 @@
                 </div>
             </div>
 
-            <!-- Approval Toggle -->
             <div>
                 <label class="toggle-option" for="requireApprovalInput">
                     <div class="toggle-info">
@@ -162,7 +139,7 @@
         </div>
     </div>
 
-    <!-- Join Class Modal -->
+    <!-- ── Join Class Modal ───────────────────────────────────────────────── -->
     <div class="modal" id="joinModal">
         <div class="modal-content">
             <h2>Join a Class</h2>
@@ -181,59 +158,52 @@
         </div>
     </div>
 
-    <!-- Edit Profile Modal -->
-    <!-- Edit Profile Modal -->
-<div class="modal" id="editProfileModal">
-    <div class="modal-content">
-        <h2>Profile</h2>
-        <p class="shems">Update your profile information</p>
+    <!-- ── Edit Profile Modal ─────────────────────────────────────────────── -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <h2>Edit Profile</h2>
+            <p class="shems">Update your profile information</p>
 
-        <div>
-            <label for="editFirstNameInput">First Name *</label>
-            <input type="text" id="editFirstNameInput" placeholder="Your first name" required>
-        </div>
+            <div>
+                <label for="editFirstNameInput">First Name *</label>
+                <input type="text" id="editFirstNameInput" placeholder="Your first name" required>
+            </div>
 
-        <div>
-            <label for="editLastNameInput">Last Name *</label>
-            <input type="text" id="editLastNameInput" placeholder="Your last name" required>
-        </div>
+            <div>
+                <label for="editLastNameInput">Last Name *</label>
+                <input type="text" id="editLastNameInput" placeholder="Your last name" required>
+            </div>
 
-        <div>
-            <label for="editUsernameInput">Username</label>
-            <input type="text" id="editUsernameInput" placeholder="@username">
-        </div>
+            <div>
+                <label for="editPhoneInput">Phone Number *</label>
+                <input type="text" id="editPhoneInput" placeholder="e.g., +639171234567" required>
+            </div>
 
-        <div>
-            <label for="editPhoneInput">Phone Number *</label>
-            <input type="text" id="editPhoneInput" placeholder="e.g., +639171234567" required>
-        </div>
+            <div>
+                <label for="editGenderInput">Gender *</label>
+                <select id="editGenderInput" required>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
 
-        <div>
-            <label for="editGenderInput">Gender *</label>
-            <select id="editGenderInput" required>
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-            </select>
-        </div>
+            <div>
+                <label for="editBirthdayInput">Birthday *</label>
+                <input type="date" id="editBirthdayInput" required>
+            </div>
 
-        <div>
-            <label for="editBirthdayInput">Birthday *</label>
-            <input type="date" id="editBirthdayInput" required>
-        </div>
+            <div>
+                <label for="editBioInput">Bio</label>
+                <textarea id="editBioInput" placeholder="Tell something about yourself (optional)"></textarea>
+            </div>
 
-        <div>
-            <label for="editBioInput">Bio</label>
-            <textarea id="editBioInput" placeholder="Tell something about yourself (optional)"></textarea>
-        </div>
-
-        <div class="modal-actions">
-            <button class="btn cancel" id="cancelEdit">Cancel</button>
-            <button class="btn primary" id="saveProfileBtn">Save Changes</button>
+            <div class="modal-actions">
+                <button class="btn cancel" id="cancelEdit">Cancel</button>
+                <button class="btn primary" id="saveProfileBtn">Save Changes</button>
+            </div>
         </div>
     </div>
-</div>
 
     <script src="script/dashboard.js"></script>
 </body>
