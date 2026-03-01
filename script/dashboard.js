@@ -288,16 +288,12 @@ async function handleCreateClass() {
     const name            = classNameInput.value.trim();
     const description     = classDescInput.value.trim();
     const maxStudents     = parseInt(maxStudentsInput.value);
-    const hasPasscode     = passcodeToggle.checked;
-    const passcode        = hasPasscode ? passcodeInput.value.trim() : null;
     const requireApproval = requireApprovalInput.checked;
 
     if (!name)                                   return showNotification('Please enter a class name', 'error');
     if (name.length < 3 || name.length > 100)    return showNotification('Class name must be 3–100 characters', 'error');
     if (description && description.length > 500) return showNotification('Description cannot exceed 500 characters', 'error');
     if (!maxStudents || maxStudents < 1 || maxStudents > 100) return showNotification('Max students must be 1–100', 'error');
-    if (hasPasscode && !passcode)                return showNotification('Please enter a passcode', 'error');
-    if (hasPasscode && passcode.length < 8)      return showNotification('Passcode must be at least 8 characters', 'error');
 
     confirmCreate.disabled     = true;
     confirmCreate.textContent  = 'Creating...';
