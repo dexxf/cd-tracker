@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// DASHBOARD.JS — Refactored to implement JOIN CLASSROOM endpoint
+// DASHBOARD.JS — Fixed and Refactored
 // ══════════════════════════════════════════════════════════════════════════════
 
 // API Configuration
@@ -33,9 +33,9 @@ const requireApprovalInput = document.getElementById('requireApprovalInput');
 
 // Form inputs — Join Class
 const classCodeInput       = document.getElementById('classCodeInput');
+const joinPasscodeToggle   = document.getElementById('joinPasscodeToggle');
 const joinPasscodeSection  = document.getElementById('joinPasscodeSection');
 const joinPasscodeInput    = document.getElementById('joinPasscodeInput');
-const joinPasscodeToggle   = document.getElementById('joinPasscodeToggle');
 
 // Tab state
 let currentTab = 'created';
@@ -107,10 +107,11 @@ function showNotification(message, type = 'info') {
 // ══════════════════════════════════════════════════════════════════════════════
 
 function openModal(modal) {
-    modal.style.display = 'flex';
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeModal(modal) {
+    if (!modal) return;
     modal.style.display = 'none';
     
     if (modal === createModal) {
@@ -130,30 +131,40 @@ function closeModal(modal) {
     }
 }
 
+function closeProfileDropdown() {
+    if (profileDropdown) {
+        profileDropdown.classList.remove('show');
+    }
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // EVENT LISTENERS SETUP
 // ══════════════════════════════════════════════════════════════════════════════
 
 function setupEventListeners() {
     // Modal triggers
-    createClassBtn.addEventListener('click', () => openModal(createModal));
-    joinClassBtn.addEventListener('click', () => openModal(joinModal));
-    cancelCreate.addEventListener('click', () => closeModal(createModal));
-    cancelJoin.addEventListener('click', () => closeModal(joinModal));
-    cancelEdit.addEventListener('click', () => closeModal(editProfileModal));
+    createClassBtn?.addEventListener('click', () => openModal(createModal));
+    joinClassBtn?.addEventListener('click', () => openModal(joinModal));
+    cancelCreate?.addEventListener('click', () => closeModal(createModal));
+    cancelJoin?.addEventListener('click', () => closeModal(joinModal));
+    cancelEdit?.addEventListener('click', () => closeModal(editProfileModal));
 
     // Form submissions
-    confirmCreate.addEventListener('click', handleCreateClass);
-    confirmJoin.addEventListener('click', handleJoinClass);
-    saveProfileBtn.addEventListener('click', handleSaveProfile);
+    confirmCreate?.addEventListener('click', handleCreateClass);
+    confirmJoin?.addEventListener('click', handleJoinClass);
+    saveProfileBtn?.addEventListener('click', handleSaveProfile);
 
     // Profile menu
-    userIcon.addEventListener('click', toggleProfileDropdown);
-    editProfileBtn.addEventListener('click', openEditProfile);
-    logoutBtn.addEventListener('click', handleLogout);
+    userIcon?.addEventListener('click', toggleProfileDropdown);
+    editProfileBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeProfileDropdown();
+        openEditProfile();
+    });
+    logoutBtn?.addEventListener('click', handleLogout);
 
     // Create class passcode toggle
-    passcodeToggle.addEventListener('change', (e) => {
+    passcodeToggle?.addEventListener('change', (e) => {
         if (e.target.checked) {
             passcodeSection.style.display = 'block';
             passcodeInput.required = true;
@@ -164,19 +175,19 @@ function setupEventListeners() {
         }
     });
 
-    // Join class passcode toggle (if element exists)
-    if (joinPasscodeToggle) {
-        joinPasscodeToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                joinPasscodeSection.style.display = 'block';
-                joinPasscodeInput.required = true;
-            } else {
-                joinPasscodeSection.style.display = 'none';
+    // Join class passcode toggle
+    joinPasscodeToggle?.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            if (joinPasscodeSection) joinPasscodeSection.style.display = 'block';
+            if (joinPasscodeInput) joinPasscodeInput.required = true;
+        } else {
+            if (joinPasscodeSection) joinPasscodeSection.style.display = 'none';
+            if (joinPasscodeInput) {
                 joinPasscodeInput.required = false;
                 joinPasscodeInput.value = '';
             }
-        });
-    }
+        }
+    });
 
     // Tab switching
     document.addEventListener('click', (e) => {
@@ -187,13 +198,18 @@ function setupEventListeners() {
 
     // Modal close on background click
     window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) closeModal(e.target);
+        if (e.target.classList.contains('modal') && e.target.style.display === 'flex') {
+            closeModal(e.target);
+        }
     });
 
     // Profile dropdown close on outside click
     document.addEventListener('click', (e) => {
-        if (!userIcon.contains(e.target) && !profileDropdown.contains(e.target)) {
-            profileDropdown.classList.remove('show');
+        const isUserIconClick = userIcon && userIcon.contains(e.target);
+        const isDropdownClick = profileDropdown && profileDropdown.contains(e.target);
+        
+        if (!isUserIconClick && !isDropdownClick) {
+            closeProfileDropdown();
         }
     });
 }
@@ -235,30 +251,38 @@ function applyProfileToUI(data) {
     const gender     = capitalise(unwrap(data.gender));
 
     // Header
-    document.getElementById('userName').textContent   = fullName;
-    document.getElementById('welcomeMsg').textContent = `Welcome back, ${firstName || fullName}!`;
+    const userNameEl = document.getElementById('userName');
+    if (userNameEl) userNameEl.textContent = fullName;
+    
+    const welcomeEl = document.getElementById('welcomeMsg');
+    if (welcomeEl) welcomeEl.textContent = `Welcome back, ${firstName || fullName}!`;
 
     // Dropdown
-    document.getElementById('fullName').textContent = fullName;
-    document.getElementById('username').textContent = gender;
+    const fullNameEl = document.getElementById('fullName');
+    if (fullNameEl) fullNameEl.textContent = fullName;
+    
+    const usernameEl = document.getElementById('username');
+    if (usernameEl) usernameEl.textContent = gender;
 
     // Avatar
     const iconEl = document.getElementById('userIcon');
-    if (profileUrl) {
-        iconEl.innerHTML = `<img src="${profileUrl}" alt="${fullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    } else {
-        iconEl.textContent = getInitials(fullName);
+    if (iconEl) {
+        if (profileUrl) {
+            iconEl.innerHTML = `<img src="${escapeHtml(profileUrl)}" alt="${escapeHtml(fullName)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        } else {
+            iconEl.textContent = getInitials(fullName);
+        }
     }
 }
 
 function toggleProfileDropdown(e) {
     e.stopPropagation();
-    profileDropdown.classList.toggle('show');
+    if (profileDropdown) {
+        profileDropdown.classList.toggle('show');
+    }
 }
 
 async function openEditProfile() {
-    profileDropdown.classList.remove('show');
-
     try {
         const response = await fetch(`${API_BASE_URL}/users/profile`, {
             method: 'GET',
@@ -269,37 +293,52 @@ async function openEditProfile() {
 
         const data = await response.json();
 
-        document.getElementById('editFirstNameInput').value = data.firstName           || '';
-        document.getElementById('editLastNameInput').value  = data.lastName            || '';
-        document.getElementById('editPhoneInput').value     = unwrap(data.phoneNumber) || '';
-        document.getElementById('editGenderInput').value    = unwrap(data.gender)      || '';
-        document.getElementById('editBirthdayInput').value  = unwrap(data.birthday)    || '';
-        document.getElementById('editBioInput').value       = data.bio                 || '';
+        const firstNameEl = document.getElementById('editFirstNameInput');
+        const lastNameEl = document.getElementById('editLastNameInput');
+        const phoneEl = document.getElementById('editPhoneInput');
+        const genderEl = document.getElementById('editGenderInput');
+        const birthdayEl = document.getElementById('editBirthdayInput');
+        const bioEl = document.getElementById('editBioInput');
+
+        if (firstNameEl) firstNameEl.value = data.firstName || '';
+        if (lastNameEl) lastNameEl.value = data.lastName || '';
+        if (phoneEl) phoneEl.value = unwrap(data.phoneNumber) || '';
+        if (genderEl) genderEl.value = unwrap(data.gender) || '';
+        if (birthdayEl) birthdayEl.value = unwrap(data.birthday) || '';
+        if (bioEl) bioEl.value = data.bio || '';
+
+        openModal(editProfileModal);
 
     } catch (error) {
         console.error('Error fetching profile for edit:', error);
         showNotification('Failed to load profile data', 'error');
-        return;
     }
-
-    openModal(editProfileModal);
 }
 
 async function handleSaveProfile() {
-    const firstName   = document.getElementById('editFirstNameInput').value.trim();
-    const lastName    = document.getElementById('editLastNameInput').value.trim();
-    const phoneNumber = document.getElementById('editPhoneInput').value.trim();
-    const gender      = document.getElementById('editGenderInput').value.trim();
-    const birthday    = document.getElementById('editBirthdayInput').value;
-    const bio         = document.getElementById('editBioInput').value;
+    const firstNameEl = document.getElementById('editFirstNameInput');
+    const lastNameEl = document.getElementById('editLastNameInput');
+    const phoneEl = document.getElementById('editPhoneInput');
+    const genderEl = document.getElementById('editGenderInput');
+    const birthdayEl = document.getElementById('editBirthdayInput');
+    const bioEl = document.getElementById('editBioInput');
+
+    const firstName   = firstNameEl?.value.trim() || '';
+    const lastName    = lastNameEl?.value.trim() || '';
+    const phoneNumber = phoneEl?.value.trim() || '';
+    const gender      = genderEl?.value.trim() || '';
+    const birthday    = birthdayEl?.value || '';
+    const bio         = bioEl?.value || '';
 
     if (!firstName || !lastName || !phoneNumber || !gender || !birthday) {
         showNotification('Please fill all required fields', 'error');
         return;
     }
 
-    saveProfileBtn.disabled     = true;
-    saveProfileBtn.textContent  = 'Saving...';
+    if (saveProfileBtn) {
+        saveProfileBtn.disabled    = true;
+        saveProfileBtn.textContent = 'Saving...';
+    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/users/profile`, {
@@ -323,14 +362,17 @@ async function handleSaveProfile() {
         console.error(error);
         showNotification(error.message || 'Update failed', 'error');
     } finally {
-        saveProfileBtn.disabled    = false;
-        saveProfileBtn.textContent = 'Save Changes';
+        if (saveProfileBtn) {
+            saveProfileBtn.disabled    = false;
+            saveProfileBtn.textContent = 'Save Changes';
+        }
     }
 }
 
 function handleLogout() {
     if (confirm('Are you sure you want to log out?')) {
         localStorage.clear();
+        sessionStorage.clear();
         window.location.href = 'index.html';
     }
 }
@@ -340,11 +382,11 @@ function handleLogout() {
 // ══════════════════════════════════════════════════════════════════════════════
 
 async function handleCreateClass() {
-    const name            = classNameInput.value.trim();
-    const description     = classDescInput.value.trim();
-    const maxStudents     = parseInt(maxStudentsInput.value);
-    const requireApproval = requireApprovalInput.checked;
-    const passcode        = passcodeToggle.checked ? passcodeInput.value.trim() : null;
+    const name            = classNameInput?.value.trim() || '';
+    const description     = classDescInput?.value.trim() || '';
+    const maxStudents     = parseInt(maxStudentsInput?.value || '50');
+    const requireApproval = requireApprovalInput?.checked || false;
+    const passcode        = passcodeToggle?.checked ? passcodeInput?.value.trim() : null;
 
     // Validation
     if (!name) {
@@ -363,8 +405,10 @@ async function handleCreateClass() {
         return showNotification('Passcode must be at least 4 characters', 'error');
     }
 
-    confirmCreate.disabled     = true;
-    confirmCreate.textContent  = 'Creating...';
+    if (confirmCreate) {
+        confirmCreate.disabled    = true;
+        confirmCreate.textContent = 'Creating...';
+    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/classrooms/create`, {
@@ -401,26 +445,25 @@ async function handleCreateClass() {
         console.error('Error creating classroom:', error);
         showNotification(error.message || 'Failed to create classroom. Please try again.', 'error');
     } finally {
-        confirmCreate.disabled    = false;
-        confirmCreate.textContent = 'Create Class';
+        if (confirmCreate) {
+            confirmCreate.disabled    = false;
+            confirmCreate.textContent = 'Create Class';
+        }
     }
 }
 
-/**
- * Handle join classroom — POST /api/classrooms/join
- * Sends: { code: string, passcode?: string }
- * Returns: { success: boolean, data: ClassroomJoinResult, error?: string }
- */
 async function handleJoinClass() {
-    const code = classCodeInput.value.trim();
+    const code = classCodeInput?.value.trim() || '';
     const passcode = joinPasscodeToggle?.checked ? joinPasscodeInput?.value.trim() : undefined;
 
     if (!code) {
         return showNotification('Please enter a class code', 'error');
     }
 
-    confirmJoin.disabled    = true;
-    confirmJoin.textContent = 'Joining...';
+    if (confirmJoin) {
+        confirmJoin.disabled    = true;
+        confirmJoin.textContent = 'Joining...';
+    }
 
     try {
         const payload = { code };
@@ -441,11 +484,7 @@ async function handleJoinClass() {
         });
 
         console.log('Response status:', response.status);
-        console.log('Response headers:', {
-            'content-type': response.headers.get('content-type')
-        });
 
-        // Try to parse response as text first
         const responseText = await response.text();
         console.log('Response text:', responseText);
 
@@ -456,22 +495,19 @@ async function handleJoinClass() {
             }
         } catch (parseError) {
             console.error('Failed to parse response:', parseError);
-            throw new Error(`Invalid response format from server: ${responseText}`);
+            throw new Error(`Invalid response format from server`);
         }
 
-        // Check if response is OK first
         if (!response.ok) {
             const errorMsg = data?.error || data?.message || `Server error: ${response.status}`;
             throw new Error(errorMsg);
         }
 
-        // Then check for success flag
         if (data && data.success === false) {
             const errorMsg = data.error || data.message || 'Failed to join classroom';
             throw new Error(errorMsg);
         }
 
-        // Success!
         console.log('Successfully joined classroom:', data);
         showNotification('Successfully joined classroom!', 'success');
         closeModal(joinModal);
@@ -481,8 +517,10 @@ async function handleJoinClass() {
         console.error('Error joining classroom:', error);
         showNotification(error.message || 'Failed to join classroom. Please try again.', 'error');
     } finally {
-        confirmJoin.disabled    = false;
-        confirmJoin.textContent = 'Join Class';
+        if (confirmJoin) {
+            confirmJoin.disabled    = false;
+            confirmJoin.textContent = 'Join Class';
+        }
     }
 }
 
@@ -512,20 +550,25 @@ async function loadClasses() {
         let createdClasses = Array.isArray(createdData) ? createdData : createdData.data || [];
 
         // Load joined classrooms
-        const joinedResponse = await fetch(`${API_BASE_URL}/classrooms/join`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-
         let joinedClasses = [];
-        if (joinedResponse.ok) {
-            const joinedData = await joinedResponse.json();
-            joinedClasses = Array.isArray(joinedData) 
-                ? joinedData.map(item => ({
-                    ...item.classroom,
-                    studentCount: item.studentCount
-                }))
-                : [];
+        try {
+            const joinedResponse = await fetch(`${API_BASE_URL}/classrooms/join`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (joinedResponse.ok) {
+                const joinedData = await joinedResponse.json();
+                joinedClasses = Array.isArray(joinedData) 
+                    ? joinedData.map(item => ({
+                        ...item.classroom,
+                        studentCount: item.studentCount
+                    }))
+                    : [];
+            }
+        } catch (error) {
+            console.warn('Failed to load joined classrooms:', error);
+            joinedClasses = [];
         }
 
         classroomsData.created = createdClasses;
@@ -536,12 +579,15 @@ async function loadClasses() {
 
     } catch (error) {
         console.error('ERROR in loadClasses:', error);
-        container.innerHTML = '<p class="error-message">Failed to load classes. Please try again.</p>';
+        if (container) {
+            container.innerHTML = '<p class="error-message">Failed to load classes. Please try again.</p>';
+        }
         showNotification('Failed to load classes', 'error');
     }
 }
 
 function switchTab(tab) {
+    if (!tab) return;
     currentTab = tab;
     document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tab);
@@ -558,7 +604,9 @@ function updateTabCounts() {
 
 function renderClasses() {
     const container = document.getElementById('classroomGrid');
-    const classes   = classroomsData[currentTab];
+    if (!container) return;
+
+    const classes   = classroomsData[currentTab] || [];
     const isCreated = currentTab === 'created';
 
     if (classes.length === 0) {
@@ -584,7 +632,7 @@ function createClassCard(classroom, isCreated) {
     const className       = classroom.name || classroom.title || classroom.className || 'Unnamed Class';
 
     return `
-        <div class="class-card" data-class-id="${classId}">
+        <div class="class-card" data-class-id="${escapeHtml(classId)}">
             <div class="class-card-header">
                 <h4 class="class-name">${escapeHtml(className)}</h4>
                 ${isCreated
@@ -608,8 +656,8 @@ function createClassCard(classroom, isCreated) {
                     ${requireApproval ? '<span class="setting-badge"><i class="fas fa-user-check"></i> Approval</span>' : ''}
                 </div>` : ''}
             <div class="class-actions">
-                <button class="btn btn-primary view-class" data-class-id="${classId}">View Class</button>
-                ${isCreated ? `<button class="btn btn-secondary manage-class" data-class-id="${classId}">Manage</button>` : ''}
+                <button class="btn btn-primary view-class" data-class-id="${escapeHtml(classId)}">View Class</button>
+                ${isCreated ? `<button class="btn btn-secondary manage-class" data-class-id="${escapeHtml(classId)}">Manage</button>` : ''}
             </div>
         </div>
     `;
@@ -617,21 +665,36 @@ function createClassCard(classroom, isCreated) {
 
 function attachClassCardHandlers() {
     document.querySelectorAll('.view-class').forEach(btn => {
-        btn.addEventListener('click', e => viewClassroom(e.target.dataset.classId));
+        btn.addEventListener('click', e => {
+            const classId = e.target.dataset.classId;
+            if (classId) viewClassroom(classId);
+        });
     });
     document.querySelectorAll('.manage-class').forEach(btn => {
-        btn.addEventListener('click', e => manageClassroom(e.target.dataset.classId));
+        btn.addEventListener('click', e => {
+            const classId = e.target.dataset.classId;
+            if (classId) manageClassroom(classId);
+        });
     });
 }
 
 function viewClassroom(classId) {
-    window.location.href = `classroom.html?id=${classId}`;
+    if (classId && classId !== 'unknown') {
+        window.location.href = `classroom.html?id=${encodeURIComponent(classId)}`;
+    } else {
+        showNotification('Invalid classroom ID', 'error');
+    }
 }
 
 function manageClassroom(classId) {
-    window.location.href = `manage-classroom.html?id=${classId}`;
+    if (classId && classId !== 'unknown') {
+        window.location.href = `manage-classroom.html?id=${encodeURIComponent(classId)}`;
+    } else {
+        showNotification('Invalid classroom ID', 'error');
+    }
 }
 
+// Add animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn  { from { transform:translateX(400px);opacity:0 } to { transform:translateX(0);opacity:1 } }
