@@ -520,7 +520,12 @@ async function loadClasses() {
         let joinedClasses = [];
         if (joinedResponse.ok) {
             const joinedData = await joinedResponse.json();
-            joinedClasses = Array.isArray(joinedData) ? joinedData : joinedData.data || [];
+            joinedClasses = Array.isArray(joinedData) 
+                ? joinedData.map(item => ({
+                    ...item.classroom,
+                    studentCount: item.studentCount
+                }))
+                : [];
         }
 
         classroomsData.created = createdClasses;
