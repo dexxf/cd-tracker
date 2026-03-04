@@ -491,7 +491,7 @@ async function loadClasses() {
     if (!container) return;
 
     container.innerHTML = '<p class="loading-message">Loading your classes...</p>';
-
+ 
     try {
         // Load created classrooms
         const createdResponse = await fetch(`${API_BASE_URL}/classrooms/me`, {
@@ -626,10 +626,6 @@ function viewClassroom(classId) {
 function manageClassroom(classId) {
     window.location.href = `manage-classroom.html?id=${classId}`;
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// ANIMATION STYLES
-// ══════════════════════════════════════════════════════════════════════════════
 
 const style = document.createElement('style');
 style.textContent = `
