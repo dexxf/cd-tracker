@@ -491,43 +491,36 @@ async function loadClasses() {
     if (!container) return;
 
     container.innerHTML = '<p class="loading-message">Loading your classes...</p>';
-
+ 
     try {
-        const response = await fetch(`${API_BASE_URL}/classrooms/me`, {
+        // Load created classrooms
+        const createdResponse = await fetch(`${API_BASE_URL}/classrooms/me`, {
             method: 'GET',
             credentials: 'include'
         });
 
-        if (!response.ok) {
-            if (response.status === 401) {
+        if (!createdResponse.ok) {
+            if (createdResponse.status === 401) {
                 showNotification('Authentication required. Please log in again.', 'error');
                 setTimeout(() => { window.location.href = 'index.html'; }, 2000);
                 return;
             }
-            throw new Error(`Failed to fetch classrooms: ${response.status}`);
+            throw new Error(`Failed to fetch classrooms: ${createdResponse.status}`);
         }
 
-        const data = await response.json();
+        const createdData = await createdResponse.json();
+        let createdClasses = Array.isArray(createdData) ? createdData : createdData.data || [];
 
-        let createdClasses = [];
-        let joinedClasses  = [];
+        // Load joined classrooms
+        const joinedResponse = await fetch(`${API_BASE_URL}/classrooms/join`, {
+            method: 'GET',
+            credentials: 'include'
+        });
 
-        if (Array.isArray(data)) {
-            createdClasses = data;
-        } else if (data) {
-            createdClasses = Array.isArray(data.createdClassrooms) ? data.createdClassrooms
-                           : Array.isArray(data.created)           ? data.created
-                           : Array.isArray(data.owned)             ? data.owned
-                           : Array.isArray(data.classrooms)        ? data.classrooms
-                           : Array.isArray(data.data)              ? data.data
-                           : Array.isArray(data.data?.classrooms)  ? data.data.classrooms
-                           : [];
-
-            joinedClasses  = Array.isArray(data.joinedClassrooms)  ? data.joinedClassrooms
-                           : Array.isArray(data.joined)            ? data.joined
-                           : Array.isArray(data.member)            ? data.member
-                           : Array.isArray(data.data?.joined)      ? data.data.joined
-                           : [];
+        let joinedClasses = [];
+        if (joinedResponse.ok) {
+            const joinedData = await joinedResponse.json();
+            joinedClasses = Array.isArray(joinedData) ? joinedData : joinedData.data || [];
         }
 
         classroomsData.created = createdClasses;
@@ -633,10 +626,6 @@ function viewClassroom(classId) {
 function manageClassroom(classId) {
     window.location.href = `manage-classroom.html?id=${classId}`;
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
-// ANIMATION STYLES
-// ══════════════════════════════════════════════════════════════════════════════
 
 const style = document.createElement('style');
 style.textContent = `
