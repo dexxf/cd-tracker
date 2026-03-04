@@ -1,7 +1,11 @@
+// ══════════════════════════════════════════════════════════════════════════════
+// DASHBOARD.JS — Refactored to implement JOIN CLASSROOM endpoint
+// ══════════════════════════════════════════════════════════════════════════════
+
 // API Configuration
 const API_BASE_URL = 'http://localhost:8080/api';
 
-// DOM Elements
+// ── DOM Elements ────────────────────────────────────────────────────────────
 const createClassBtn       = document.getElementById('createClassBtn');
 const joinClassBtn         = document.getElementById('joinClassBtn');
 const createModal          = document.getElementById('createModal');
@@ -18,7 +22,7 @@ const logoutBtn            = document.getElementById('logoutBtn');
 const cancelEdit           = document.getElementById('cancelEdit');
 const saveProfileBtn       = document.getElementById('saveProfileBtn');
 
-// Form inputs
+// Form inputs — Create Class
 const classNameInput       = document.getElementById('classNameInput');
 const classDescInput       = document.getElementById('classDescInput');
 const maxStudentsInput     = document.getElementById('maxStudentsInput');
@@ -26,7 +30,12 @@ const passcodeToggle       = document.getElementById('passcodeToggle');
 const passcodeSection      = document.getElementById('passcodeSection');
 const passcodeInput        = document.getElementById('passcodeInput');
 const requireApprovalInput = document.getElementById('requireApprovalInput');
+
+// Form inputs — Join Class
 const classCodeInput       = document.getElementById('classCodeInput');
+const joinPasscodeSection  = document.getElementById('joinPasscodeSection');
+const joinPasscodeInput    = document.getElementById('joinPasscodeInput');
+const joinPasscodeToggle   = document.getElementById('joinPasscodeToggle');
 
 // Tab state
 let currentTab = 'created';
@@ -35,15 +44,20 @@ let classroomsData = { created: [], joined: [] };
 // Current user
 let currentUser = null;
 
-// ── Initialize ────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// INITIALIZATION
+// ══════════════════════════════════════════════════════════════════════════════
+
 document.addEventListener('DOMContentLoaded', () => {
     loadUserProfile();
     loadClasses();
     setupEventListeners();
 });
 
-// ── Value object unwrapper ────────────────────────────────────────────────────
-// Backend returns Gender, PhoneNumber, Birthday as value objects — unwrap them
+// ══════════════════════════════════════════════════════════════════════════════
+// UTILITY FUNCTIONS
+// ══════════════════════════════════════════════════════════════════════════════
+
 function unwrap(val) {
     if (!val) return '';
     if (typeof val === 'string') return val;
@@ -68,7 +82,126 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ── Load user profile — GET /api/users/profile ────────────────────────────────
+function showNotification(message, type = 'info') {
+    document.querySelector('.notification')?.remove();
+
+    const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6', warning: '#f59e0b' };
+    const n = document.createElement('div');
+    n.className = `notification notification-${type}`;
+    n.textContent = message;
+    n.style.cssText = `
+        position:fixed;top:20px;right:20px;padding:15px 20px;border-radius:8px;
+        color:#fff;font-weight:500;z-index:10000;animation:slideIn .3s ease-out;
+        box-shadow:0 4px 12px rgba(0,0,0,.15);max-width:400px;
+        background-color:${colors[type] || colors.info};
+    `;
+    document.body.appendChild(n);
+    setTimeout(() => {
+        n.style.animation = 'slideOut .3s ease-in';
+        setTimeout(() => n.remove(), 300);
+    }, 3000);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function openModal(modal) {
+    modal.style.display = 'flex';
+}
+
+function closeModal(modal) {
+    modal.style.display = 'none';
+    
+    if (modal === createModal) {
+        classNameInput.value       = '';
+        classDescInput.value       = '';
+        maxStudentsInput.value     = '50';
+        passcodeToggle.checked     = false;
+        passcodeSection.style.display = 'none';
+        passcodeInput.value        = '';
+        passcodeInput.required     = false;
+        requireApprovalInput.checked = false;
+    } else if (modal === joinModal) {
+        classCodeInput.value = '';
+        if (joinPasscodeSection) joinPasscodeSection.style.display = 'none';
+        if (joinPasscodeInput) joinPasscodeInput.value = '';
+        if (joinPasscodeToggle) joinPasscodeToggle.checked = false;
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EVENT LISTENERS SETUP
+// ══════════════════════════════════════════════════════════════════════════════
+
+function setupEventListeners() {
+    // Modal triggers
+    createClassBtn.addEventListener('click', () => openModal(createModal));
+    joinClassBtn.addEventListener('click', () => openModal(joinModal));
+    cancelCreate.addEventListener('click', () => closeModal(createModal));
+    cancelJoin.addEventListener('click', () => closeModal(joinModal));
+    cancelEdit.addEventListener('click', () => closeModal(editProfileModal));
+
+    // Form submissions
+    confirmCreate.addEventListener('click', handleCreateClass);
+    confirmJoin.addEventListener('click', handleJoinClass);
+    saveProfileBtn.addEventListener('click', handleSaveProfile);
+
+    // Profile menu
+    userIcon.addEventListener('click', toggleProfileDropdown);
+    editProfileBtn.addEventListener('click', openEditProfile);
+    logoutBtn.addEventListener('click', handleLogout);
+
+    // Create class passcode toggle
+    passcodeToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            passcodeSection.style.display = 'block';
+            passcodeInput.required = true;
+        } else {
+            passcodeSection.style.display = 'none';
+            passcodeInput.required = false;
+            passcodeInput.value = '';
+        }
+    });
+
+    // Join class passcode toggle (if element exists)
+    if (joinPasscodeToggle) {
+        joinPasscodeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                joinPasscodeSection.style.display = 'block';
+                joinPasscodeInput.required = true;
+            } else {
+                joinPasscodeSection.style.display = 'none';
+                joinPasscodeInput.required = false;
+                joinPasscodeInput.value = '';
+            }
+        });
+    }
+
+    // Tab switching
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tab-button')) {
+            switchTab(e.target.dataset.tab);
+        }
+    });
+
+    // Modal close on background click
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) closeModal(e.target);
+    });
+
+    // Profile dropdown close on outside click
+    document.addEventListener('click', (e) => {
+        if (!userIcon.contains(e.target) && !profileDropdown.contains(e.target)) {
+            profileDropdown.classList.remove('show');
+        }
+    });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PROFILE MANAGEMENT
+// ══════════════════════════════════════════════════════════════════════════════
+
 async function loadUserProfile() {
     try {
         const response = await fetch(`${API_BASE_URL}/users/profile`, {
@@ -90,28 +223,26 @@ async function loadUserProfile() {
 
     } catch (error) {
         console.error('Error loading profile:', error);
+        showNotification('Failed to load profile', 'error');
     }
 }
 
-// ── Apply FetchProfileDataResponse to UI ──────────────────────────────────────
 function applyProfileToUI(data) {
     const firstName  = data.firstName || '';
     const lastName   = data.lastName  || '';
     const fullName   = `${firstName} ${lastName}`.trim() || 'User';
     const profileUrl = data.profileUrl || '';
+    const gender     = capitalise(unwrap(data.gender));
 
-    // Value objects
-    const gender   = capitalise(unwrap(data.gender));
-
-    // ── Header ──
+    // Header
     document.getElementById('userName').textContent   = fullName;
     document.getElementById('welcomeMsg').textContent = `Welcome back, ${firstName || fullName}!`;
 
-    // ── Dropdown ──
+    // Dropdown
     document.getElementById('fullName').textContent = fullName;
     document.getElementById('username').textContent = gender;
 
-    // ── Avatar ──
+    // Avatar
     const iconEl = document.getElementById('userIcon');
     if (profileUrl) {
         iconEl.innerHTML = `<img src="${profileUrl}" alt="${fullName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
@@ -120,87 +251,11 @@ function applyProfileToUI(data) {
     }
 }
 
-// ── Setup event listeners ─────────────────────────────────────────────────────
-function setupEventListeners() {
-    createClassBtn.addEventListener('click', () => openModal(createModal));
-    joinClassBtn.addEventListener('click', () => openModal(joinModal));
-    cancelCreate.addEventListener('click', () => closeModal(createModal));
-    cancelJoin.addEventListener('click', () => closeModal(joinModal));
-    cancelEdit.addEventListener('click', () => closeModal(editProfileModal));
-
-    confirmCreate.addEventListener('click', handleCreateClass);
-    confirmJoin.addEventListener('click', handleJoinClass);
-    saveProfileBtn.addEventListener('click', handleSaveProfile);
-
-    userIcon.addEventListener('click', toggleProfileDropdown);
-    editProfileBtn.addEventListener('click', openEditProfile);
-    logoutBtn.addEventListener('click', handleLogout);
-
-    passcodeToggle.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            passcodeSection.style.display = 'block';
-            passcodeInput.required = true;
-        } else {
-            passcodeSection.style.display = 'none';
-            passcodeInput.required = false;
-            passcodeInput.value = '';
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('tab-button')) {
-            switchTab(e.target.dataset.tab);
-        }
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) closeModal(e.target);
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!userIcon.contains(e.target) && !profileDropdown.contains(e.target)) {
-            profileDropdown.classList.remove('show');
-        }
-    });
-}
-
-// ── Tab switching ─────────────────────────────────────────────────────────────
-function switchTab(tab) {
-    currentTab = tab;
-    document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
-    });
-    renderClasses();
-}
-
-// ── Modal helpers ─────────────────────────────────────────────────────────────
-function openModal(modal) {
-    modal.style.display = 'flex';
-}
-
-function closeModal(modal) {
-    modal.style.display = 'none';
-    if (modal === createModal) {
-        classNameInput.value       = '';
-        classDescInput.value       = '';
-        maxStudentsInput.value     = '50';
-        passcodeToggle.checked     = false;
-        passcodeSection.style.display = 'none';
-        passcodeInput.value        = '';
-        passcodeInput.required     = false;
-        requireApprovalInput.checked = false;
-    } else if (modal === joinModal) {
-        classCodeInput.value = '';
-    }
-}
-
-// ── Profile dropdown ──────────────────────────────────────────────────────────
 function toggleProfileDropdown(e) {
     e.stopPropagation();
     profileDropdown.classList.toggle('show');
 }
 
-// ── Open edit profile — GET /api/users/profile ────────────────────────────────
 async function openEditProfile() {
     profileDropdown.classList.remove('show');
 
@@ -214,7 +269,6 @@ async function openEditProfile() {
 
         const data = await response.json();
 
-        // Unwrap value objects before populating form
         document.getElementById('editFirstNameInput').value = data.firstName           || '';
         document.getElementById('editLastNameInput').value  = data.lastName            || '';
         document.getElementById('editPhoneInput').value     = unwrap(data.phoneNumber) || '';
@@ -231,7 +285,6 @@ async function openEditProfile() {
     openModal(editProfileModal);
 }
 
-// ── Save profile — PUT /api/users/profile ─────────────────────────────────────
 async function handleSaveProfile() {
     const firstName   = document.getElementById('editFirstNameInput').value.trim();
     const lastName    = document.getElementById('editLastNameInput').value.trim();
@@ -253,7 +306,7 @@ async function handleSaveProfile() {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ firstName, lastName, phoneNumber, gender, birthday, bio})
+            body: JSON.stringify({ firstName, lastName, phoneNumber, gender, birthday, bio })
         });
 
         const data = await response.json();
@@ -275,7 +328,6 @@ async function handleSaveProfile() {
     }
 }
 
-// ── Logout ────────────────────────────────────────────────────────────────────
 function handleLogout() {
     if (confirm('Are you sure you want to log out?')) {
         localStorage.clear();
@@ -283,17 +335,33 @@ function handleLogout() {
     }
 }
 
-// ── Create classroom ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// CLASSROOM MANAGEMENT
+// ══════════════════════════════════════════════════════════════════════════════
+
 async function handleCreateClass() {
     const name            = classNameInput.value.trim();
     const description     = classDescInput.value.trim();
     const maxStudents     = parseInt(maxStudentsInput.value);
     const requireApproval = requireApprovalInput.checked;
+    const passcode        = passcodeToggle.checked ? passcodeInput.value.trim() : null;
 
-    if (!name)                                   return showNotification('Please enter a class name', 'error');
-    if (name.length < 3 || name.length > 100)    return showNotification('Class name must be 3–100 characters', 'error');
-    if (description && description.length > 500) return showNotification('Description cannot exceed 500 characters', 'error');
-    if (!maxStudents || maxStudents < 1 || maxStudents > 100) return showNotification('Max students must be 1–100', 'error');
+    // Validation
+    if (!name) {
+        return showNotification('Please enter a class name', 'error');
+    }
+    if (name.length < 3 || name.length > 100) {
+        return showNotification('Class name must be 3–100 characters', 'error');
+    }
+    if (description && description.length > 500) {
+        return showNotification('Description cannot exceed 500 characters', 'error');
+    }
+    if (!maxStudents || maxStudents < 1 || maxStudents > 100) {
+        return showNotification('Max students must be 1–100', 'error');
+    }
+    if (passcode && passcode.length < 4) {
+        return showNotification('Passcode must be at least 4 characters', 'error');
+    }
 
     confirmCreate.disabled     = true;
     confirmCreate.textContent  = 'Creating...';
@@ -338,26 +406,86 @@ async function handleCreateClass() {
     }
 }
 
-// ── Join classroom ────────────────────────────────────────────────────────────
+/**
+ * Handle join classroom — POST /api/classrooms/join
+ * Sends: { code: string, passcode?: string }
+ * Returns: { success: boolean, data: ClassroomJoinResult, error?: string }
+ */
 async function handleJoinClass() {
-    const classCode = classCodeInput.value.trim();
-    if (!classCode) return showNotification('Please enter a class code', 'error');
+    const code = classCodeInput.value.trim();
+    const passcode = joinPasscodeToggle?.checked ? joinPasscodeInput?.value.trim() : undefined;
+
+    if (!code) {
+        return showNotification('Please enter a class code', 'error');
+    }
 
     confirmJoin.disabled    = true;
     confirmJoin.textContent = 'Joining...';
 
     try {
-        showNotification('Join classroom feature coming soon!', 'info');
+        const payload = { code };
+        if (passcode) {
+            payload.passcode = passcode;
+        }
+
+        console.log('Sending join request with payload:', payload);
+
+        const response = await fetch(`${API_BASE_URL}/classrooms/join`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', {
+            'content-type': response.headers.get('content-type')
+        });
+
+        // Try to parse response as text first
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+
+        let data = null;
+        try {
+            if (responseText) {
+                data = JSON.parse(responseText);
+            }
+        } catch (parseError) {
+            console.error('Failed to parse response:', parseError);
+            throw new Error(`Invalid response format from server: ${responseText}`);
+        }
+
+        // Check if response is OK first
+        if (!response.ok) {
+            const errorMsg = data?.error || data?.message || `Server error: ${response.status}`;
+            throw new Error(errorMsg);
+        }
+
+        // Then check for success flag
+        if (data && data.success === false) {
+            const errorMsg = data.error || data.message || 'Failed to join classroom';
+            throw new Error(errorMsg);
+        }
+
+        // Success!
+        console.log('Successfully joined classroom:', data);
+        showNotification('Successfully joined classroom!', 'success');
         closeModal(joinModal);
+        await loadClasses();
+
     } catch (error) {
-        showNotification('Failed to join classroom. Please try again.', 'error');
+        console.error('Error joining classroom:', error);
+        showNotification(error.message || 'Failed to join classroom. Please try again.', 'error');
     } finally {
         confirmJoin.disabled    = false;
         confirmJoin.textContent = 'Join Class';
     }
 }
 
-// ── Load classes — GET /api/classrooms/me ─────────────────────────────────────
 async function loadClasses() {
     const container = document.getElementById('classroomGrid');
     if (!container) return;
@@ -415,7 +543,14 @@ async function loadClasses() {
     }
 }
 
-// ── Tab counts ────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    renderClasses();
+}
+
 function updateTabCounts() {
     const createdTab = document.querySelector('[data-tab="created"]');
     const joinedTab  = document.querySelector('[data-tab="joined"]');
@@ -423,7 +558,6 @@ function updateTabCounts() {
     if (joinedTab)  joinedTab.innerHTML  = `Joined Classes <span class="tab-count">${classroomsData.joined.length}</span>`;
 }
 
-// ── Render classes ────────────────────────────────────────────────────────────
 function renderClasses() {
     const container = document.getElementById('classroomGrid');
     const classes   = classroomsData[currentTab];
@@ -500,28 +634,10 @@ function manageClassroom(classId) {
     window.location.href = `manage-classroom.html?id=${classId}`;
 }
 
-// ── Notifications ─────────────────────────────────────────────────────────────
-function showNotification(message, type = 'info') {
-    document.querySelector('.notification')?.remove();
+// ══════════════════════════════════════════════════════════════════════════════
+// ANIMATION STYLES
+// ══════════════════════════════════════════════════════════════════════════════
 
-    const colors = { success: '#10b981', error: '#ef4444', info: '#3b82f6', warning: '#f59e0b' };
-    const n = document.createElement('div');
-    n.className = `notification notification-${type}`;
-    n.textContent = message;
-    n.style.cssText = `
-        position:fixed;top:20px;right:20px;padding:15px 20px;border-radius:8px;
-        color:#fff;font-weight:500;z-index:10000;animation:slideIn .3s ease-out;
-        box-shadow:0 4px 12px rgba(0,0,0,.15);max-width:400px;
-        background-color:${colors[type] || colors.info};
-    `;
-    document.body.appendChild(n);
-    setTimeout(() => {
-        n.style.animation = 'slideOut .3s ease-in';
-        setTimeout(() => n.remove(), 300);
-    }, 3000);
-}
-
-// ── Animation styles ──────────────────────────────────────────────────────────
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn  { from { transform:translateX(400px);opacity:0 } to { transform:translateX(0);opacity:1 } }
