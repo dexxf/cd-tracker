@@ -5,17 +5,950 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeTracker - Professor Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="profclass.css">
     <link rel="icon" type="image/png" href="git.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.5;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .logo-text p {
+            font-size: 14px;
+            color: #8b949e;
+        }
+
+        /* Professor Info */
+        .professor-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #161b22;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            min-width: 200px;
+        }
+
+        .professor-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #1f6feb, #2ea043);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .professor-details h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .professor-details p {
+            font-size: 12px;
+            color: #8b949e;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .professor-badge {
+            background-color: rgba(31, 111, 235, 0.1);
+            color: #1f6feb;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 4px;
+        }
+
+        /* Back to Dashboard Button */
+        .back-to-dashboard {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .back-to-dashboard:hover {
+            background-color: #1f2937;
+            border-color: #1f6feb;
+            transform: translateX(-2px);
+        }
+
+        .back-to-dashboard i {
+            color: #58a6ff;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        /* Left Column */
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Section Styling */
+        .section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: #58a6ff;
+        }
+
+        /* Create Activity Button - Moved to top of Active Assignments */
+        .create-activity-btn {
+            background: linear-gradient(135deg, #1f6feb, #2ea043);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .create-activity-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+        }
+
+        /* Assignment Card - Like studentclass */
+        .assignment-card {
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #0d1117;
+            transition: all 0.2s ease;
+        }
+
+        .assignment-card:hover {
+            border-color: #1f6feb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .assignment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .assignment-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #58a6ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .assignment-title:hover {
+            text-decoration: underline;
+        }
+
+        .assignment-title i {
+            color: #2ea043;
+        }
+
+        .assignment-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #1f6feb;
+            color: white;
+            border-color: #1f6feb;
+        }
+
+        .assignment-desc {
+            color: #8b949e;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 8px 0 12px 0;
+            padding-left: 28px;
+        }
+
+        .assignment-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 12px;
+            color: #8b949e;
+            padding-left: 28px;
+            margin-bottom: 16px;
+        }
+
+        .assignment-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background-color: rgba(248, 81, 73, 0.1);
+            color: #f85149;
+            border: 1px solid rgba(248, 81, 73, 0.2);
+        }
+
+        .assignment-status i {
+            font-size: 12px;
+        }
+
+        .days-left {
+            font-weight: 600;
+        }
+
+        .days-left.urgent {
+            color: #f85149;
+        }
+
+        .days-left.normal {
+            color: #58a6ff;
+        }
+
+        .in-progress {
+            color: #2ea043;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .points {
+            color: #d29922;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .submission-count {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #58a6ff;
+        }
+
+        .passed-count {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #2ea043;
+            background-color: rgba(46, 160, 67, 0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .progress-container {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #30363d;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-title {
+            font-size: 13px;
+            color: #8b949e;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .progress-title i {
+            color: #2ea043;
+        }
+
+        .progress-value {
+            font-size: 14px;
+            color: #2ea043;
+            font-weight: 700;
+            background-color: rgba(46, 160, 67, 0.1);
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #30363d;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1f6feb, #2ea043);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #8b949e;
+        }
+
+        .progress-stats span i {
+            margin-right: 2px;
+        }
+
+        /* Students Section - Moved to top of All Class Activity */
+        .students-section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .students-header {
+            margin-bottom: 16px;
+        }
+
+        .students-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .students-title i {
+            color: #58a6ff;
+        }
+
+        .students-subtitle {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .student-card-link {
+            text-decoration: none;
+            display: block;
+        }
+
+        .student-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            background: #0d1117;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .student-card:hover {
+            border-color: #1f6feb;
+            background: #0c2d6b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.2);
+        }
+
+        .student-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1f6feb, #2ea043);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .student-status {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 2px;
+        }
+
+        .student-last-active {
+            font-size: 12px;
+            color: #6e7681;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .student-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: conic-gradient(#2ea043 75%, #30363d 0);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-circle::before {
+            content: '75%';
+            position: absolute;
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* Right Column - All Class Activity */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .activity-section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .activity-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .activity-title i {
+            color: #58a6ff;
+        }
+
+        .filter-select {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #1f6feb;
+        }
+
+        .filter-select option {
+            background: #161b22;
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .activity-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .activity-list::-webkit-scrollbar-track {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        .activity-list::-webkit-scrollbar-thumb {
+            background: #1f6feb;
+            border-radius: 4px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid #30363d;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .activity-item:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1f6feb, #2ea043);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .activity-avatar.professor {
+            background: linear-gradient(135deg, #f0883e, #f85149);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-user {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .activity-user span {
+            color: #8b949e;
+            font-weight: 400;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .activity-text {
+            font-size: 14px;
+            color: #c9d1d9;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .activity-details {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 4px;
+        }
+
+        .activity-details i {
+            margin-right: 4px;
+            color: #58a6ff;
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: #6e7681;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .activity-time i {
+            font-size: 10px;
+        }
+
+        .activity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .badge-created {
+            background-color: rgba(46, 160, 67, 0.1);
+            color: #2ea043;
+            border: 1px solid rgba(46, 160, 67, 0.2);
+        }
+
+        .badge-submitted {
+            background-color: rgba(88, 166, 255, 0.1);
+            color: #58a6ff;
+            border: 1px solid rgba(88, 166, 255, 0.2);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-header h2 i {
+            color: #58a6ff;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #8b949e;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .close-btn:hover {
+            color: #ffffff;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .form-group label i {
+            color: #58a6ff;
+            margin-right: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1f6feb;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid #30363d;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1f6feb, #2ea043);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border-color: #30363d;
+            color: #8b949e;
+        }
+
+        .btn-secondary:hover {
+            background: #30363d;
+            color: #ffffff;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .right-column {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .professor-user-info {
+                width: 100%;
+            }
+            
+            .back-to-dashboard {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .assignment-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section {
+                padding: 16px;
+            }
+            
+            .logo-text h1 {
+                font-size: 20px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .brand-logo {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .create-activity-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <div class="header">
         <div class="logo-container">
             <div class="logo">
-              <div>
-                <img src="git.png" alt="CodeTracker Logo" class="brand-logo">
-              </div>
+                <div>
+                    <img src="git.png" alt="CodeTracker Logo" class="brand-logo">
+                </div>
                 <div class="logo-text">
                     <h1>CodeTracker</h1>
                     <p>GitHub Project Tracking System</p>
@@ -23,8 +956,7 @@
             </div>
         </div>
         
-        <!-- TOP RIGHT: Professor User Info ONLY (Removed stats) -->
-        <div class="course-info">
+        <div style="display: flex; align-items: center;">
             <div class="professor-user-info">
                 <div class="professor-avatar">IC</div>
                 <div class="professor-details">
@@ -35,133 +967,604 @@
         </div>
     </div>
 
+    <!-- Back to Dashboard Button -->
+    <a href="#" class="back-to-dashboard" id="backToDashboardBtn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Dashboard
+    </a>
+
     <!-- Main Layout -->
     <div class="main-layout">
         <!-- Left Column -->
         <div class="left-column">
-            <!-- Active Assignments -->
+            <!-- Active Assignments with Create Activity at Top -->
             <div class="section">
                 <div class="section-header">
-                    <h2 class="section-title">Active Assignments</h2>
+                    <h2 class="section-title">
+                        <i class="fas fa-tasks"></i>
+                        Active Assignments
+                    </h2>
+                    <button class="create-activity-btn" id="createActivityBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Create Activity
+                    </button>
                 </div>
                 
-                <div class="assignment-card">
-                    <h3 class="assignment-title">System 1</h3>
-                    <p class="assignment-description">
-                        Build a full-stack e-commerce platform with user authentication, product catalog, shopping cart, and payment integration.
-                    </p>
-                    
-                    <div class="assignment-details">
-                        <div class="detail-item">
-                            <h4>Due</h4>
-                            <p class="due-date">Feb 15, 2026</p>
-                            <p class="countdown">9 days left</p>
-                        </div>
-                        <div class="detail-item">
-                            <h4>Submission Rate</h4>
-                            <p>1/1 students</p>
-                        </div>
-                        <div class="detail-item">
-                            <h4>1 submission received</h4>
-                            <p>100 points</p>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-container">
-                        <div class="progress-header">
-                            <span class="progress-title">Submission Progress</span>
-                            <span class="progress-value">100%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill"></div>
-                        </div>
-                    </div>
+                <div id="assignmentsList">
+                    <!-- Assignments will be dynamically added here -->
                 </div>
-            </div>
-
-            <!-- Students -->
-            <div class="students-section">
-                <div class="students-header">
-                    <h2 class="students-title">Students</h2>
-                    <p class="students-subtitle">Click on a student to view detailed analytics</p>
-                </div>
-              <a href="../templates/index.html" class="student-card-link">
-                  <div class="student-card" id="studentCard">
-                    <div class="student-avatar">DF</div>
-                    <div class="student-info">
-                      <div class="student-name">Dexter Facelo</div>
-                      <div class="student-status">0/1 completed • 1 in progress</div>
-                    </div>
-                    <div class="student-progress">
-                      <div class="progress-circle" id="progressCircle"></div>
-                    </div>
-                  </div>
-                </a>
             </div>
         </div>
 
-        <!-- Right Column -->
+        <!-- Right Column - All Class Activity with Students at Top -->
         <div class="right-column">
-            <!-- Recent Activity -->
-            <div class="activity-section">
-                <h2 class="activity-title">Recent Activity</h2>
-                
-                <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-header">
-                            <div class="activity-avatar">DF</div>
-                            <div class="activity-user">Dexter Facelo</div>
-                        </div>
-                        <p class="activity-text">pushed 5 commits to "Assignment 1"</p>
-                        <p class="activity-time">8 mins ago</p>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-header">
-                            <div class="activity-avatar">IC</div>
-                            <div class="activity-user">Israel Cabasug</div>
-                        </div>
-                        <p class="activity-text">posted a new milestone</p>
-                        <p class="activity-time">1 hour ago</p>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-header">
-                            <div class="activity-avatar">DF</div>
-                            <div class="activity-user">Dexter Facelo</div>
-                        </div>
-                        <p class="activity-text">opened a PR</p>
-                        <p class="activity-time">3 hours ago</p>
-                    </div>
+            <!-- Students Section (Moved to top) -->
+            <div class="students-section">
+                <div class="students-header">
+                    <h2 class="students-title">
+                        <i class="fas fa-users"></i>
+                        Students
+                    </h2>
+                    <p class="students-subtitle">Click on a student to view detailed analytics</p>
                 </div>
+                <a href="../templates/index.html" class="student-card-link">
+                    <div class="student-card" id="studentCard">
+                        <div class="student-avatar">DF</div>
+                        <div class="student-info">
+                            <div class="student-name">Dexter Facelo</div>
+                            <div class="student-status">0/1 completed • 1 in progress</div>
+                            <div class="student-last-active">
+                                <i class="far fa-clock"></i>
+                                Last active: 2 mins ago
+                            </div>
+                        </div>
+                        <div class="student-progress">
+                            <div class="progress-circle" id="progressCircle"></div>
+                        </div>
+                    </div>
+                </a>
             </div>
 
-            <!-- Stats -->
-            <div class="stats-card">
-                <h2 class="activity-title">Course Stats</h2>
+            <!-- All Class Activity -->
+            <div class="activity-section">
+                <div class="activity-header">
+                    <h2 class="activity-title">
+                        <i class="fas fa-globe"></i>
+                        All Class Activity
+                    </h2>
+                    <select class="filter-select" id="activityFilter">
+                        <option value="all">All Activity</option>
+                        <option value="assignments">Assignments</option>
+                        <option value="submissions">Submissions</option>
+                    </select>
+                </div>
                 
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-value">100%</div>
-                        <div class="stat-label">Completion Rate</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">1</div>
-                        <div class="stat-label">Active Assignments</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">75%</div>
-                        <div class="stat-label">Avg. Score</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value">64%</div>
-                        <div class="stat-label">Engagement</div>
-                    </div>
+                <div class="activity-list" id="activityList">
+                    <!-- Activities will be dynamically added here -->
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="profclass.js"></script>
+    <!-- Create Activity Modal (Removed Difficulty) -->
+    <div class="modal" id="createActivityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-plus-circle"></i>
+                    Create New Activity
+                </h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createActivityForm">
+                    <div class="form-group">
+                        <label for="activityTitle">
+                            <i class="fas fa-heading"></i>
+                            Activity Title
+                        </label>
+                        <input type="text" id="activityTitle" placeholder="e.g., System 2 - API Development" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activityDescription">
+                            <i class="fas fa-align-left"></i>
+                            Description
+                        </label>
+                        <textarea id="activityDescription" placeholder="Describe the activity requirements..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dueDate">
+                                <i class="fas fa-calendar-alt"></i>
+                                Due Date
+                            </label>
+                            <input type="date" id="dueDate" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dueTime">
+                                <i class="fas fa-clock"></i>
+                                Due Time
+                            </label>
+                            <input type="time" id="dueTime" value="23:59" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="points">
+                            <i class="fas fa-star"></i>
+                            Points
+                        </label>
+                        <input type="number" id="points" min="0" value="100" required>
+                    </div>
+                    
+                    <!-- Removed Difficulty field -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveActivityBtn">
+                    <i class="fas fa-save"></i>
+                    Create Activity
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Current date for reference (March 5, 2026)
+        const currentDate = new Date('2026-03-05');
+        
+        // Store activities with pass/fail data
+        let activities = [
+            {
+                id: 1,
+                title: 'System 1 - E-Commerce Platform',
+                description: 'Build a full-stack e-commerce platform with user authentication, product catalog, shopping cart, and payment integration.',
+                dueDate: '2026-03-14',
+                dueTime: '23:59',
+                points: 100,
+                totalStudents: 1,
+                passedStudents: 1,      // Student passed
+                failedStudents: 0,       // No failures
+                pendingStudents: 0,       // No pending
+                status: 'active'
+            },
+            {
+                id: 2,
+                title: 'Database Design Project',
+                description: 'Design and implement a normalized database schema for a library management system.',
+                dueDate: '2026-03-28',
+                dueTime: '23:59',
+                points: 50,
+                totalStudents: 1,
+                passedStudents: 0,        // No passes yet
+                failedStudents: 0,         // No failures
+                pendingStudents: 1,         // 1 pending (not submitted or in progress)
+                status: 'active'
+            },
+            {
+                id: 3,
+                title: 'Mobile App Development',
+                description: 'Create a React Native mobile application for task management with push notifications and offline support.',
+                dueDate: '2026-04-19',
+                dueTime: '23:59',
+                points: 150,
+                totalStudents: 1,
+                passedStudents: 0,
+                failedStudents: 0,
+                pendingStudents: 1,
+                status: 'active'
+            }
+        ];
+
+        // Store activity log
+        let activityLog = [
+            {
+                id: 1,
+                user: 'Israel Cabasug',
+                userRole: 'Professor',
+                avatar: 'IC',
+                type: 'assignment_created',
+                title: 'Created new activity: System 1 - E-Commerce Platform',
+                details: 'Due: Mar 14, 2026 • 100 points',
+                time: '2026-03-05T09:30:00',
+                badge: 'created'
+            },
+            {
+                id: 2,
+                user: 'Dexter Facelo',
+                userRole: 'Student',
+                avatar: 'DF',
+                type: 'submission',
+                title: 'Submitted System 1 - Initial Draft',
+                details: 'Repository: github.com/dexterfacelo/system1 • Score: 92/100 (PASSED)',
+                time: '2026-03-05T10:15:00',
+                badge: 'submitted'
+            },
+            {
+                id: 3,
+                user: 'Israel Cabasug',
+                userRole: 'Professor',
+                avatar: 'IC',
+                type: 'assignment_created',
+                title: 'Created new activity: Database Design Project',
+                details: 'Due: Mar 28, 2026 • 50 points',
+                time: '2026-03-04T14:00:00',
+                badge: 'created'
+            },
+            {
+                id: 4,
+                user: 'Dexter Facelo',
+                userRole: 'Student',
+                avatar: 'DF',
+                type: 'submission',
+                title: 'Submitted Database Design - ER Diagram',
+                details: 'Repository: github.com/dexterfacelo/database-design • Score: 45/100 (FAILED)',
+                time: '2026-03-04T15:30:00',
+                badge: 'submitted'
+            },
+            {
+                id: 5,
+                user: 'Dexter Facelo',
+                userRole: 'Student',
+                avatar: 'DF',
+                type: 'submission',
+                title: 'Submitted Module 3: API Development',
+                details: 'Repository: github.com/dexterfacelo/api-module • Score: 98/100 (PASSED)',
+                time: '2026-03-03T16:45:00',
+                badge: 'submitted'
+            }
+        ];
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Format time ago
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + ' years ago';
+            
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + ' months ago';
+            
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + ' days ago';
+            
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + ' hours ago';
+            
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + ' minutes ago';
+            
+            return 'just now';
+        }
+
+        // Calculate days left
+        function getDaysLeft(dueDate) {
+            const due = new Date(dueDate);
+            const diffTime = due - currentDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        // Calculate pass rate percentage
+        function getPassRate(activity) {
+            if (activity.totalStudents === 0) return 0;
+            return Math.round((activity.passedStudents / activity.totalStudents) * 100);
+        }
+
+        // Render assignments with Submission Progress as pass rate
+        function renderAssignments() {
+            const assignmentsList = document.getElementById('assignmentsList');
+            assignmentsList.innerHTML = '';
+
+            activities.forEach(activity => {
+                const daysLeft = getDaysLeft(activity.dueDate);
+                const dueDateObj = new Date(activity.dueDate);
+                const formattedDueDate = dueDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const passRate = getPassRate(activity);
+                
+                const assignmentCard = document.createElement('div');
+                assignmentCard.className = 'assignment-card';
+                assignmentCard.innerHTML = `
+                    <div class="assignment-header">
+                        <div class="assignment-title">
+                            <i class="fas fa-tasks"></i>
+                            ${activity.title}
+                        </div>
+                        <div class="assignment-actions">
+                            <button class="action-btn" onclick="editActivity(${activity.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn" onclick="deleteActivity(${activity.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="assignment-desc">${activity.description}</div>
+                    <div class="assignment-meta">
+                        <span class="assignment-due">
+                            <i class="fas fa-calendar-alt"></i>
+                            Due: ${formattedDueDate}
+                        </span>
+                        <span class="days-left ${daysLeft <= 7 ? 'urgent' : 'normal'}">
+                            <i class="fas fa-hourglass-half"></i>
+                            ${daysLeft} days left
+                        </span>
+                        <span class="points">
+                            <i class="fas fa-star"></i>
+                            ${activity.points} points
+                        </span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <span class="progress-title">
+                                <i class="fas fa-check-circle"></i>
+                                Submission Progress (Passed)
+                            </span>
+                            <span class="progress-value">${passRate}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${passRate}%"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span>
+                                <i class="fas fa-check-circle" style="color: #2ea043;"></i>
+                                Passed: ${activity.passedStudents}
+                            </span>
+                            <span>
+                                <i class="fas fa-times-circle" style="color: #f85149;"></i>
+                                Failed: ${activity.failedStudents}
+                            </span>
+                            <span>
+                                <i class="fas fa-clock" style="color: #8b949e;"></i>
+                                Pending: ${activity.pendingStudents}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                assignmentsList.appendChild(assignmentCard);
+            });
+        }
+
+        // Render activity log
+        function renderActivityLog(filter = 'all') {
+            const activityList = document.getElementById('activityList');
+            activityList.innerHTML = '';
+
+            let filteredLog = activityLog;
+            if (filter !== 'all') {
+                filteredLog = activityLog.filter(item => {
+                    if (filter === 'assignments') return item.type === 'assignment_created';
+                    if (filter === 'submissions') return item.type === 'submission';
+                });
+            }
+
+            // Sort by time (most recent first)
+            filteredLog.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+            filteredLog.forEach(item => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                activityItem.onclick = () => showActivityDetails(item);
+                
+                let badgeClass = item.badge === 'created' ? 'badge-created' : 'badge-submitted';
+
+                activityItem.innerHTML = `
+                    <div class="activity-avatar ${item.userRole === 'Professor' ? 'professor' : ''}">
+                        ${item.avatar}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-user">
+                            ${item.user}
+                            <span>${item.userRole}</span>
+                            <span class="activity-badge ${badgeClass}">
+                                ${item.badge === 'created' ? '<i class="fas fa-plus"></i>' : '<i class="fas fa-paper-plane"></i>'}
+                                ${item.badge}
+                            </span>
+                        </div>
+                        <div class="activity-text">${item.title}</div>
+                        <div class="activity-details">
+                            <i class="fas fa-info-circle"></i>
+                            ${item.details}
+                        </div>
+                        <div class="activity-time">
+                            <i class="far fa-clock"></i>
+                            ${timeAgo(item.time)}
+                        </div>
+                    </div>
+                `;
+                activityList.appendChild(activityItem);
+            });
+        }
+
+        // Show activity details
+        function showActivityDetails(item) {
+            alert(`
+Activity Details:
+----------------
+User: ${item.user} (${item.userRole})
+Action: ${item.title}
+Details: ${item.details}
+Time: ${new Date(item.time).toLocaleString()}
+            `);
+        }
+
+        // Edit activity
+        function editActivity(id) {
+            const activity = activities.find(a => a.id === id);
+            if (activity) {
+                document.getElementById('activityTitle').value = activity.title;
+                document.getElementById('activityDescription').value = activity.description;
+                document.getElementById('dueDate').value = activity.dueDate;
+                document.getElementById('dueTime').value = activity.dueTime;
+                document.getElementById('points').value = activity.points;
+                
+                document.getElementById('createActivityModal').classList.add('active');
+                // Store that we're editing
+                window.editingActivityId = id;
+            }
+        }
+
+        // Delete activity
+        function deleteActivity(id) {
+            if (confirm('Are you sure you want to delete this activity?')) {
+                activities = activities.filter(a => a.id !== id);
+                renderAssignments();
+                
+                // Add to activity log
+                activityLog.unshift({
+                    id: activityLog.length + 1,
+                    user: 'Israel Cabasug',
+                    userRole: 'Professor',
+                    avatar: 'IC',
+                    type: 'assignment_deleted',
+                    title: 'Deleted an activity',
+                    details: 'Activity was removed from the course',
+                    time: new Date().toISOString(),
+                    badge: 'created'
+                });
+                renderActivityLog(document.getElementById('activityFilter').value);
+            }
+        }
+
+        // Save activity
+        document.getElementById('saveActivityBtn').onclick = () => {
+            const title = document.getElementById('activityTitle').value;
+            const description = document.getElementById('activityDescription').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const dueTime = document.getElementById('dueTime').value;
+            const points = document.getElementById('points').value;
+
+            if (!title || !description || !dueDate || !dueTime || !points) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            if (window.editingActivityId) {
+                // Update existing activity
+                const index = activities.findIndex(a => a.id === window.editingActivityId);
+                if (index !== -1) {
+                    activities[index] = {
+                        ...activities[index],
+                        title,
+                        description,
+                        dueDate,
+                        dueTime,
+                        points: parseInt(points)
+                    };
+                    
+                    // Add to activity log
+                    activityLog.unshift({
+                        id: activityLog.length + 1,
+                        user: 'Israel Cabasug',
+                        userRole: 'Professor',
+                        avatar: 'IC',
+                        type: 'assignment_updated',
+                        title: `Updated activity: ${title}`,
+                        details: `Due: ${formatDate(dueDate)} • ${points} points`,
+                        time: new Date().toISOString(),
+                        badge: 'created'
+                    });
+                }
+                delete window.editingActivityId;
+            } else {
+                // Create new activity
+                const newActivity = {
+                    id: activities.length + 1,
+                    title,
+                    description,
+                    dueDate,
+                    dueTime,
+                    points: parseInt(points),
+                    totalStudents: 1,
+                    passedStudents: 0,
+                    failedStudents: 0,
+                    pendingStudents: 1,
+                    status: 'active'
+                };
+                activities.push(newActivity);
+
+                // Add to activity log
+                activityLog.unshift({
+                    id: activityLog.length + 1,
+                    user: 'Israel Cabasug',
+                    userRole: 'Professor',
+                    avatar: 'IC',
+                    type: 'assignment_created',
+                    title: `Created new activity: ${title}`,
+                    details: `Due: ${formatDate(dueDate)} • ${points} points`,
+                    time: new Date().toISOString(),
+                    badge: 'created'
+                });
+            }
+
+            // Close modal
+            document.getElementById('createActivityModal').classList.remove('active');
+            document.getElementById('createActivityForm').reset();
+            
+            // Re-render
+            renderAssignments();
+            renderActivityLog(document.getElementById('activityFilter').value);
+        };
+
+        // Filter activity
+        document.getElementById('activityFilter').addEventListener('change', (e) => {
+            renderActivityLog(e.target.value);
+        });
+
+        // Modal controls
+        document.getElementById('createActivityBtn').onclick = () => {
+            document.getElementById('createActivityModal').classList.add('active');
+        };
+
+        document.getElementById('closeModalBtn').onclick = () => {
+            document.getElementById('createActivityModal').classList.remove('active');
+            document.getElementById('createActivityForm').reset();
+            delete window.editingActivityId;
+        };
+
+        document.getElementById('cancelBtn').onclick = () => {
+            document.getElementById('createActivityModal').classList.remove('active');
+            document.getElementById('createActivityForm').reset();
+            delete window.editingActivityId;
+        };
+
+        // Back to Dashboard button
+        document.getElementById('backToDashboardBtn').onclick = (e) => {
+            e.preventDefault();
+            alert('Returning to main dashboard...');
+            // window.location.href = '/dashboard';
+        };
+
+        // Close modal when clicking outside
+        window.onclick = (e) => {
+            const modal = document.getElementById('createActivityModal');
+            if (e.target === modal) {
+                modal.classList.remove('active');
+                document.getElementById('createActivityForm').reset();
+                delete window.editingActivityId;
+            }
+        };
+
+        // Initialize
+        renderAssignments();
+        renderActivityLog();
+
+        // Set default due date to 2 weeks from now
+        const today = new Date('2026-03-05');
+        const twoWeeksLater = new Date(today);
+        twoWeeksLater.setDate(today.getDate() + 14);
+        document.getElementById('dueDate').value = twoWeeksLater.toISOString().split('T')[0];
+    </script>
 </body>
 </html>
