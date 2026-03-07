@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeTracker - Professor Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="git.png">
+    <link rel="stylesheet" href="frontend/css/profclass.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-container">
+            <div class="logo">
+                <div>
+                    <img src="git.png" alt="CodeTracker Logo" class="brand-logo">
+                </div>
+                <div class="logo-text">
+                    <h1>CodeTracker</h1>
+                    <p>GitHub Project Tracking System</p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: flex; align-items: center;">
+            <div class="professor-user-info">
+                <div class="professor-avatar" id="professorAvatar">IC</div>
+                <div class="professor-details">
+                    <h3 id="professorName">Israel Cabasug</h3>
+                    <p>Professor <span class="professor-badge">Instructor</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Dashboard Button -->
+    <a href="dashboard.html" class="back-to-dashboard" id="backToDashboardBtn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Dashboard
+    </a>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Column -->
+        <div class="left-column">
+            <!-- Active Assignments -->
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-tasks"></i>
+                        Active Activities
+                    </h2>
+                    <button class="create-activity-btn" id="createActivityBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Create Activity
+                    </button>
+                </div>
+                
+                <div id="assignmentsList">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No activities yet. Create your first one!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <!-- Students Section -->
+            <div class="students-section">
+                <div class="students-header">
+                    <h2 class="students-title">
+                        <i class="fas fa-users"></i>
+                        Students
+                    </h2>
+                    <p class="students-subtitle">Click on a student to view analytics</p>
+                </div>
+                <div id="studentsList">
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No students enrolled yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Class Activity -->
+            <div class="activity-section">
+                <div class="activity-header">
+                    <h2 class="activity-title">
+                        <i class="fas fa-globe"></i>
+                        Recent Activity
+                    </h2>
+                    <select class="filter-select" id="activityFilter">
+                        <option value="all">All Activity</option>
+                        <option value="activities">Activities</option>
+                        <option value="submissions">Submissions</option>
+                    </select>
+                </div>
+                
+                <div class="activity-list" id="activityList">
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <p>No activity yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Activity Modal -->
+    <div class="modal" id="createActivityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-plus-circle"></i>
+                    Create New Activity
+                </h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createActivityForm">
+                    <div class="form-group">
+                        <label for="activityTitle">
+                            <i class="fas fa-heading"></i>
+                            Activity Title
+                        </label>
+                        <input type="text" id="activityTitle" placeholder="e.g., System 2 - API Development" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activityDescription">
+                            <i class="fas fa-align-left"></i>
+                            Description
+                        </label>
+                        <textarea id="activityDescription" placeholder="Describe the activity requirements..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dueDate">
+                                <i class="fas fa-calendar-alt"></i>
+                                Due Date
+                            </label>
+                            <input type="date" id="dueDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="maxScore">
+                                <i class="fas fa-star"></i>
+                                Max Score
+                            </label>
+                            <input type="number" id="maxScore" min="0" max="1000" value="100">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activityStatus">
+                            <i class="fas fa-sliders-h"></i>
+                            Status
+                        </label>
+                        <select id="activityStatus" required>
+                            <option value="">-- Select Status --</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="ARCHIVED">Archived</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveActivityBtn">
+                    <i class="fas fa-save"></i>
+                    Create Activity
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="frontend/script/profclass.js"></script>
+</body>
+</html>

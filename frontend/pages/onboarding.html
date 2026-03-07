@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complete Your Profile — CodeTracker</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="frontend/css/onboarding.css">
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="brand">
+        <div class="brand-mark">
+          <img src="git.png" alt="CodeTracker Logo" />
+        </div>
+
+        <span class="brand-name">CodeTracker</span>
+      </div>
+
+      <div class="page-title">Complete your<br /><span>profile.</span></div>
+      <p class="page-sub">One-time setup — takes less than a minute.</p>
+
+      <div class="alert" id="alert"></div>
+
+      <div class="card">
+        <form id="regForm" novalidate>
+          <!-- Personal -->
+          <div class="section">
+            <div class="section-label">Personal info</div>
+
+            <div class="grid-2">
+              <div class="fg">
+                <label>First Name <span class="req">*</span></label>
+                <input type="text" id="firstName" placeholder="John" />
+                <span class="err-text" id="firstNameErr">Required</span>
+              </div>
+              <div class="fg">
+                <label>Last Name <span class="req">*</span></label>
+                <input type="text" id="lastName" placeholder="Doe" />
+                <span class="err-text" id="lastNameErr">Required</span>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="fg">
+                <label>Phone <span class="req">*</span></label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  placeholder="+1 555 000 0000"
+                />
+                <span class="err-text" id="phoneNumberErr">Required</span>
+              </div>
+              <div class="fg">
+                <label>Birthday <span class="req">*</span></label>
+                <input type="date" id="birthday" />
+                <span class="err-text" id="birthdayErr">Required</span>
+              </div>
+            </div>
+
+            <div class="fg">
+              <label>Gender <span class="req">*</span></label>
+              <select id="gender">
+                <option value="">Select gender</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+                <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+              </select>
+              <span class="err-text" id="genderErr">Required</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Profile -->
+          <div class="section">
+            <div class="section-label">Profile</div>
+
+            <div class="fg">
+              <label>Profile Picture <span class="req">*</span></label>
+              <div class="upload-zone" id="uploadZone">
+                <input type="file" id="profileFile" accept="image/*" />
+                <div class="avatar" id="avatar">👤</div>
+                <div class="upload-info">
+                  <div class="upload-title" id="uploadTitle">
+                    Click or drop to upload a photo
+                  </div>
+                  <div class="upload-hint" id="uploadHint">
+                    PNG, JPG, GIF — max 5 MB
+                  </div>
+                  <div class="upload-fname" id="uploadFname"></div>
+                </div>
+              </div>
+              <span class="err-text" id="profileFileErr"
+                >Profile picture is required</span
+              >
+            </div>
+
+            <div class="fg">
+              <label
+                >Bio
+                <span style="color: var(--muted); font-size: 10px"
+                  >(optional)</span
+                ></label
+              >
+              <textarea
+                id="bio"
+                placeholder="Tell us about yourself…"
+              ></textarea>
+              <span class="err-text" id="bioErr"></span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn" id="submitBtn">
+            <span class="spinner" id="spinner"></span>
+            Complete Profile
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="frontend/script/onboarding.js"></script>
+  </body>
+</html>
