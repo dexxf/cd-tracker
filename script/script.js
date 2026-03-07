@@ -13,7 +13,7 @@ const BACKEND_ORIGIN = "http://localhost:8080";
     const data = await response.json();
 
     if (data.authenticated == true) {
-      window.location.replace("/dashboard.html");
+      window.location.replace("dashboard.html");
       return;
     }
 
@@ -39,10 +39,10 @@ window.addEventListener("message", (event) => {
 
   if (data.registered === true) {
     // Existing user → dashboard
-    window.location.href = "/dashboard.html";
+    window.location.href = "dashboard.html";
   } else {
     // New user → onboarding
-    window.location.href = "/onboarding.html";
+    window.location.href = "onboarding.html";
   }
 });
 

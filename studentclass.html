@@ -935,7 +935,7 @@
       </header>
 
       <!-- Back to Dashboard Button -->
-      <a href="#" class="back-to-dashboard" id="backToDashboardBtn">
+      <a href="dashboard.html" class="back-to-dashboard" id="backToDashboardBtn">
         <i class="fas fa-arrow-left"></i>
         Back to Dashboard
       </a>
@@ -1379,8 +1379,7 @@
       // Back to Dashboard button
       document.getElementById('backToDashboardBtn').onclick = (e) => {
         e.preventDefault();
-        alert('Returning to dashboard...');
-        // window.location.href = '/dashboard';
+        window.location.href = 'dashboard.html';
       };
 
       // Paste from clipboard

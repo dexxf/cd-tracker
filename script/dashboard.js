@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// DASHBOARD.JS — Fixed and Refactored
+// DASHBOARD.JS — Fixed with Professor Dashboard Navigation
 // ══════════════════════════════════════════════════════════════════════════════
 
 // API Configuration
@@ -424,17 +424,20 @@ async function handleCreateClass() {
             })
         });
 
-        const contentType = response.headers.get('content-type');
+        const responseText = await response.text();
         let data = null;
-        if (contentType?.includes('application/json')) {
-            const text = await response.text();
-            if (text) data = JSON.parse(text);
+        if (responseText) {
+            try { data = JSON.parse(responseText); } catch (_) { data = null; }
         }
 
         if (!response.ok) {
             if (response.status === 401) throw new Error('Authentication failed. Please log in again.');
             if (response.status === 403) throw new Error('You do not have permission to create classrooms.');
             throw new Error(data?.message || data?.error || `Server error: ${response.status}`);
+        }
+
+        if (data?.success === false) {
+            throw new Error(data.message || data.error || 'Failed to create classroom');
         }
 
         showNotification('Classroom created successfully!', 'success');
@@ -546,8 +549,11 @@ async function loadClasses() {
             throw new Error(`Failed to fetch classrooms: ${createdResponse.status}`);
         }
 
-        const createdData = await createdResponse.json();
-        let createdClasses = Array.isArray(createdData) ? createdData : createdData.data || [];
+        const createdResult = await createdResponse.json();
+        if (createdResult.success === false) {
+            throw new Error(createdResult.message || createdResult.error || 'Failed to fetch classrooms');
+        }
+        let createdClasses = Array.isArray(createdResult) ? createdResult : createdResult.data || [];
 
         // Load joined classrooms
         let joinedClasses = [];
@@ -678,9 +684,14 @@ function attachClassCardHandlers() {
     });
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// FIXED NAVIGATION TO PROFESSOR DASHBOARD
+// ══════════════════════════════════════════════════════════════════════════════
+
 function viewClassroom(classId) {
     if (classId && classId !== 'unknown') {
-        window.location.href = `classroom.html?id=${encodeURIComponent(classId)}`;
+        // Navigate to professor dashboard with classroom ID as parameter
+        window.location.href = `profclass.html?id=${encodeURIComponent(classId)}`;
     } else {
         showNotification('Invalid classroom ID', 'error');
     }
@@ -688,7 +699,8 @@ function viewClassroom(classId) {
 
 function manageClassroom(classId) {
     if (classId && classId !== 'unknown') {
-        window.location.href = `manage-classroom.html?id=${encodeURIComponent(classId)}`;
+        // Navigate to professor dashboard to manage this classroom
+        window.location.href = `profclass.html?id=${encodeURIComponent(classId)}`;
     } else {
         showNotification('Invalid classroom ID', 'error');
     }

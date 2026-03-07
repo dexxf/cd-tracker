@@ -186,7 +186,7 @@
             color: #58a6ff;
         }
 
-        /* Create Activity Button - Moved to top of Active Assignments */
+        /* Create Activity Button */
         .create-activity-btn {
             background: linear-gradient(135deg, #1f6feb, #2ea043);
             color: white;
@@ -207,7 +207,13 @@
             box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
         }
 
-        /* Assignment Card - Like studentclass */
+        .create-activity-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Assignment Card */
         .assignment-card {
             border: 1px solid #30363d;
             border-radius: 8px;
@@ -318,36 +324,12 @@
             color: #58a6ff;
         }
 
-        .in-progress {
-            color: #2ea043;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
         .points {
             color: #d29922;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 4px;
-        }
-
-        .submission-count {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: #58a6ff;
-        }
-
-        .passed-count {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: #2ea043;
-            background-color: rgba(46, 160, 67, 0.1);
-            padding: 2px 8px;
-            border-radius: 12px;
         }
 
         .progress-container {
@@ -407,11 +389,7 @@
             color: #8b949e;
         }
 
-        .progress-stats span i {
-            margin-right: 2px;
-        }
-
-        /* Students Section - Moved to top of All Class Activity */
+        /* Students Section */
         .students-section {
             background: #161b22;
             border: 1px solid #30363d;
@@ -858,9 +836,14 @@
             color: white;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -869,9 +852,69 @@
             color: #8b949e;
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
             background: #30363d;
             color: #ffffff;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 2000;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .notification.success {
+            background: #238636;
+            color: white;
+            border: 1px solid #2ea043;
+        }
+
+        .notification.error {
+            background: #da3633;
+            color: white;
+            border: 1px solid #f85149;
+        }
+
+        .notification.info {
+            background: #0969da;
+            color: white;
+            border: 1px solid #1f6feb;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8b949e;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: #30363d;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 20px;
         }
 
         /* Responsive */
@@ -958,9 +1001,9 @@
         
         <div style="display: flex; align-items: center;">
             <div class="professor-user-info">
-                <div class="professor-avatar">IC</div>
+                <div class="professor-avatar" id="professorAvatar">IC</div>
                 <div class="professor-details">
-                    <h3>Israel Cabasug</h3>
+                    <h3 id="professorName">Israel Cabasug</h3>
                     <p>Professor <span class="professor-badge">Instructor</span></p>
                 </div>
             </div>
@@ -968,7 +1011,7 @@
     </div>
 
     <!-- Back to Dashboard Button -->
-    <a href="#" class="back-to-dashboard" id="backToDashboardBtn">
+    <a href="dashboard.html" class="back-to-dashboard" id="backToDashboardBtn">
         <i class="fas fa-arrow-left"></i>
         Back to Dashboard
     </a>
@@ -977,12 +1020,12 @@
     <div class="main-layout">
         <!-- Left Column -->
         <div class="left-column">
-            <!-- Active Assignments with Create Activity at Top -->
+            <!-- Active Assignments -->
             <div class="section">
                 <div class="section-header">
                     <h2 class="section-title">
                         <i class="fas fa-tasks"></i>
-                        Active Assignments
+                        Active Activities
                     </h2>
                     <button class="create-activity-btn" id="createActivityBtn">
                         <i class="fas fa-plus-circle"></i>
@@ -991,38 +1034,31 @@
                 </div>
                 
                 <div id="assignmentsList">
-                    <!-- Assignments will be dynamically added here -->
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No activities yet. Create your first one!</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column - All Class Activity with Students at Top -->
+        <!-- Right Column -->
         <div class="right-column">
-            <!-- Students Section (Moved to top) -->
+            <!-- Students Section -->
             <div class="students-section">
                 <div class="students-header">
                     <h2 class="students-title">
                         <i class="fas fa-users"></i>
                         Students
                     </h2>
-                    <p class="students-subtitle">Click on a student to view detailed analytics</p>
+                    <p class="students-subtitle">Click on a student to view analytics</p>
                 </div>
-                <a href="../templates/index.html" class="student-card-link">
-                    <div class="student-card" id="studentCard">
-                        <div class="student-avatar">DF</div>
-                        <div class="student-info">
-                            <div class="student-name">Dexter Facelo</div>
-                            <div class="student-status">0/1 completed • 1 in progress</div>
-                            <div class="student-last-active">
-                                <i class="far fa-clock"></i>
-                                Last active: 2 mins ago
-                            </div>
-                        </div>
-                        <div class="student-progress">
-                            <div class="progress-circle" id="progressCircle"></div>
-                        </div>
+                <div id="studentsList">
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No students enrolled yet</p>
                     </div>
-                </a>
+                </div>
             </div>
 
             <!-- All Class Activity -->
@@ -1030,23 +1066,26 @@
                 <div class="activity-header">
                     <h2 class="activity-title">
                         <i class="fas fa-globe"></i>
-                        All Class Activity
+                        Recent Activity
                     </h2>
                     <select class="filter-select" id="activityFilter">
                         <option value="all">All Activity</option>
-                        <option value="assignments">Assignments</option>
+                        <option value="activities">Activities</option>
                         <option value="submissions">Submissions</option>
                     </select>
                 </div>
                 
                 <div class="activity-list" id="activityList">
-                    <!-- Activities will be dynamically added here -->
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <p>No activity yet</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Create Activity Modal (Removed Difficulty) -->
+    <!-- Create Activity Modal -->
     <div class="modal" id="createActivityModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1071,7 +1110,7 @@
                             <i class="fas fa-align-left"></i>
                             Description
                         </label>
-                        <textarea id="activityDescription" placeholder="Describe the activity requirements..." required></textarea>
+                        <textarea id="activityDescription" placeholder="Describe the activity requirements..."></textarea>
                     </div>
                     
                     <div class="form-row">
@@ -1080,27 +1119,30 @@
                                 <i class="fas fa-calendar-alt"></i>
                                 Due Date
                             </label>
-                            <input type="date" id="dueDate" required>
+                            <input type="date" id="dueDate">
                         </div>
                         
                         <div class="form-group">
-                            <label for="dueTime">
-                                <i class="fas fa-clock"></i>
-                                Due Time
+                            <label for="maxScore">
+                                <i class="fas fa-star"></i>
+                                Max Score
                             </label>
-                            <input type="time" id="dueTime" value="23:59" required>
+                            <input type="number" id="maxScore" min="0" max="1000" value="100">
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="points">
-                            <i class="fas fa-star"></i>
-                            Points
+                        <label for="activityStatus">
+                            <i class="fas fa-sliders-h"></i>
+                            Status
                         </label>
-                        <input type="number" id="points" min="0" value="100" required>
+                        <select id="activityStatus" required>
+                            <option value="">-- Select Status --</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="ARCHIVED">Archived</option>
+                        </select>
                     </div>
-                    
-                    <!-- Removed Difficulty field -->
                 </form>
             </div>
             <div class="modal-footer">
@@ -1114,118 +1156,57 @@
     </div>
 
     <script>
-        // Current date for reference (March 5, 2026)
-        const currentDate = new Date('2026-03-05');
+        // ═══════════════════════════════════════════════════════════════════
+        // CONFIGURATION
+        // ═══════════════════════════════════════════════════════════════════
         
-        // Store activities with pass/fail data
-        let activities = [
-            {
-                id: 1,
-                title: 'System 1 - E-Commerce Platform',
-                description: 'Build a full-stack e-commerce platform with user authentication, product catalog, shopping cart, and payment integration.',
-                dueDate: '2026-03-14',
-                dueTime: '23:59',
-                points: 100,
-                totalStudents: 1,
-                passedStudents: 1,      // Student passed
-                failedStudents: 0,       // No failures
-                pendingStudents: 0,       // No pending
-                status: 'active'
-            },
-            {
-                id: 2,
-                title: 'Database Design Project',
-                description: 'Design and implement a normalized database schema for a library management system.',
-                dueDate: '2026-03-28',
-                dueTime: '23:59',
-                points: 50,
-                totalStudents: 1,
-                passedStudents: 0,        // No passes yet
-                failedStudents: 0,         // No failures
-                pendingStudents: 1,         // 1 pending (not submitted or in progress)
-                status: 'active'
-            },
-            {
-                id: 3,
-                title: 'Mobile App Development',
-                description: 'Create a React Native mobile application for task management with push notifications and offline support.',
-                dueDate: '2026-04-19',
-                dueTime: '23:59',
-                points: 150,
-                totalStudents: 1,
-                passedStudents: 0,
-                failedStudents: 0,
-                pendingStudents: 1,
-                status: 'active'
-            }
-        ];
+        const API_BASE_URL = 'http://localhost:8080/api';
+        let classroomId = null;
+        let currentUser = null;
+        let activities = [];
+        let activityLog = [];
 
-        // Store activity log
-        let activityLog = [
-            {
-                id: 1,
-                user: 'Israel Cabasug',
-                userRole: 'Professor',
-                avatar: 'IC',
-                type: 'assignment_created',
-                title: 'Created new activity: System 1 - E-Commerce Platform',
-                details: 'Due: Mar 14, 2026 • 100 points',
-                time: '2026-03-05T09:30:00',
-                badge: 'created'
-            },
-            {
-                id: 2,
-                user: 'Dexter Facelo',
-                userRole: 'Student',
-                avatar: 'DF',
-                type: 'submission',
-                title: 'Submitted System 1 - Initial Draft',
-                details: 'Repository: github.com/dexterfacelo/system1 • Score: 92/100 (PASSED)',
-                time: '2026-03-05T10:15:00',
-                badge: 'submitted'
-            },
-            {
-                id: 3,
-                user: 'Israel Cabasug',
-                userRole: 'Professor',
-                avatar: 'IC',
-                type: 'assignment_created',
-                title: 'Created new activity: Database Design Project',
-                details: 'Due: Mar 28, 2026 • 50 points',
-                time: '2026-03-04T14:00:00',
-                badge: 'created'
-            },
-            {
-                id: 4,
-                user: 'Dexter Facelo',
-                userRole: 'Student',
-                avatar: 'DF',
-                type: 'submission',
-                title: 'Submitted Database Design - ER Diagram',
-                details: 'Repository: github.com/dexterfacelo/database-design • Score: 45/100 (FAILED)',
-                time: '2026-03-04T15:30:00',
-                badge: 'submitted'
-            },
-            {
-                id: 5,
-                user: 'Dexter Facelo',
-                userRole: 'Student',
-                avatar: 'DF',
-                type: 'submission',
-                title: 'Submitted Module 3: API Development',
-                details: 'Repository: github.com/dexterfacelo/api-module • Score: 98/100 (PASSED)',
-                time: '2026-03-03T16:45:00',
-                badge: 'submitted'
-            }
-        ];
+        // ═══════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════════
 
-        // Format date
+        document.addEventListener('DOMContentLoaded', () => {
+            extractClassroomId();
+            loadUserProfile();
+            loadActivities();
+            setupEventListeners();
+        });
+
+        // ═══════════════════════════════════════════════════════════════════
+        // UTILITY FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function extractClassroomId() {
+            const params = new URLSearchParams(window.location.search);
+            classroomId = params.get('id');
+            if (!classroomId) {
+                showNotification('Classroom ID not found in URL', 'error');
+                setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease-in reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
-        // Format time ago
         function timeAgo(dateString) {
             const date = new Date(dateString);
             const seconds = Math.floor((new Date() - date) / 1000);
@@ -1248,323 +1229,311 @@
             return 'just now';
         }
 
-        // Calculate days left
         function getDaysLeft(dueDate) {
             const due = new Date(dueDate);
-            const diffTime = due - currentDate;
+            const today = new Date();
+            const diffTime = due - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             return diffDays;
         }
 
-        // Calculate pass rate percentage
-        function getPassRate(activity) {
-            if (activity.totalStudents === 0) return 0;
-            return Math.round((activity.passedStudents / activity.totalStudents) * 100);
+        // ═══════════════════════════════════════════════════════════════════
+        // MODAL HELPERS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function openModal(modal) {
+            if (modal) modal.classList.add('active');
         }
 
-        // Render assignments with Submission Progress as pass rate
-        function renderAssignments() {
-            const assignmentsList = document.getElementById('assignmentsList');
-            assignmentsList.innerHTML = '';
+        function closeModal(modal) {
+            if (modal) modal.classList.remove('active');
+        }
 
-            activities.forEach(activity => {
-                const daysLeft = getDaysLeft(activity.dueDate);
-                const dueDateObj = new Date(activity.dueDate);
-                const formattedDueDate = dueDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                const passRate = getPassRate(activity);
-                
-                const assignmentCard = document.createElement('div');
-                assignmentCard.className = 'assignment-card';
-                assignmentCard.innerHTML = `
-                    <div class="assignment-header">
-                        <div class="assignment-title">
-                            <i class="fas fa-tasks"></i>
-                            ${activity.title}
-                        </div>
-                        <div class="assignment-actions">
-                            <button class="action-btn" onclick="editActivity(${activity.id})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn" onclick="deleteActivity(${activity.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="assignment-desc">${activity.description}</div>
-                    <div class="assignment-meta">
-                        <span class="assignment-due">
-                            <i class="fas fa-calendar-alt"></i>
-                            Due: ${formattedDueDate}
-                        </span>
-                        <span class="days-left ${daysLeft <= 7 ? 'urgent' : 'normal'}">
-                            <i class="fas fa-hourglass-half"></i>
-                            ${daysLeft} days left
-                        </span>
-                        <span class="points">
-                            <i class="fas fa-star"></i>
-                            ${activity.points} points
-                        </span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-header">
-                            <span class="progress-title">
-                                <i class="fas fa-check-circle"></i>
-                                Submission Progress (Passed)
-                            </span>
-                            <span class="progress-value">${passRate}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${passRate}%"></div>
-                        </div>
-                        <div class="progress-stats">
-                            <span>
-                                <i class="fas fa-check-circle" style="color: #2ea043;"></i>
-                                Passed: ${activity.passedStudents}
-                            </span>
-                            <span>
-                                <i class="fas fa-times-circle" style="color: #f85149;"></i>
-                                Failed: ${activity.failedStudents}
-                            </span>
-                            <span>
-                                <i class="fas fa-clock" style="color: #8b949e;"></i>
-                                Pending: ${activity.pendingStudents}
-                            </span>
-                        </div>
-                    </div>
-                `;
-                assignmentsList.appendChild(assignmentCard);
+        // ═══════════════════════════════════════════════════════════════════
+        // EVENT LISTENERS
+        // ═══════════════════════════════════════════════════════════════════
+
+        function setupEventListeners() {
+            document.getElementById('createActivityBtn').addEventListener('click', () => {
+                document.getElementById('createActivityForm').reset();
+                document.getElementById('activityStatus').value = 'PUBLISHED';
+                openModal(document.getElementById('createActivityModal'));
+            });
+
+            document.getElementById('closeModalBtn').addEventListener('click', () => {
+                closeModal(document.getElementById('createActivityModal'));
+            });
+
+            document.getElementById('cancelBtn').addEventListener('click', () => {
+                closeModal(document.getElementById('createActivityModal'));
+            });
+
+            document.getElementById('saveActivityBtn').addEventListener('click', handleCreateActivity);
+
+            document.getElementById('activityFilter').addEventListener('change', (e) => {
+                filterActivityLog(e.target.value);
+            });
+
+            document.getElementById('backToDashboardBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                // Navigate back to main dashboard
+                window.location.href = 'dashboard.html';
+            });
+
+            window.addEventListener('click', (e) => {
+                const modal = document.getElementById('createActivityModal');
+                if (e.target === modal) {
+                    closeModal(modal);
+                }
             });
         }
 
-        // Render activity log
-        function renderActivityLog(filter = 'all') {
-            const activityList = document.getElementById('activityList');
-            activityList.innerHTML = '';
+        // ═══════════════════════════════════════════════════════════════════
+        // USER PROFILE
+        // ═══════════════════════════════════════════════════════════════════
 
-            let filteredLog = activityLog;
-            if (filter !== 'all') {
-                filteredLog = activityLog.filter(item => {
-                    if (filter === 'assignments') return item.type === 'assignment_created';
-                    if (filter === 'submissions') return item.type === 'submission';
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/profile`, {
+                    method: 'GET',
+                    credentials: 'include'
                 });
-            }
 
-            // Sort by time (most recent first)
-            filteredLog.sort((a, b) => new Date(b.time) - new Date(a.time));
+                if (!response.ok) throw new Error('Failed to load profile');
 
-            filteredLog.forEach(item => {
-                const activityItem = document.createElement('div');
-                activityItem.className = 'activity-item';
-                activityItem.onclick = () => showActivityDetails(item);
+                const data = await response.json();
+                currentUser = data;
                 
-                let badgeClass = item.badge === 'created' ? 'badge-created' : 'badge-submitted';
-
-                activityItem.innerHTML = `
-                    <div class="activity-avatar ${item.userRole === 'Professor' ? 'professor' : ''}">
-                        ${item.avatar}
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-user">
-                            ${item.user}
-                            <span>${item.userRole}</span>
-                            <span class="activity-badge ${badgeClass}">
-                                ${item.badge === 'created' ? '<i class="fas fa-plus"></i>' : '<i class="fas fa-paper-plane"></i>'}
-                                ${item.badge}
-                            </span>
-                        </div>
-                        <div class="activity-text">${item.title}</div>
-                        <div class="activity-details">
-                            <i class="fas fa-info-circle"></i>
-                            ${item.details}
-                        </div>
-                        <div class="activity-time">
-                            <i class="far fa-clock"></i>
-                            ${timeAgo(item.time)}
-                        </div>
-                    </div>
-                `;
-                activityList.appendChild(activityItem);
-            });
-        }
-
-        // Show activity details
-        function showActivityDetails(item) {
-            alert(`
-Activity Details:
-----------------
-User: ${item.user} (${item.userRole})
-Action: ${item.title}
-Details: ${item.details}
-Time: ${new Date(item.time).toLocaleString()}
-            `);
-        }
-
-        // Edit activity
-        function editActivity(id) {
-            const activity = activities.find(a => a.id === id);
-            if (activity) {
-                document.getElementById('activityTitle').value = activity.title;
-                document.getElementById('activityDescription').value = activity.description;
-                document.getElementById('dueDate').value = activity.dueDate;
-                document.getElementById('dueTime').value = activity.dueTime;
-                document.getElementById('points').value = activity.points;
+                const firstName = data.firstName || '';
+                const lastName = data.lastName || '';
+                const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
                 
-                document.getElementById('createActivityModal').classList.add('active');
-                // Store that we're editing
-                window.editingActivityId = id;
+                document.getElementById('professorName').textContent = `${firstName} ${lastName}`.trim() || 'Professor';
+                document.getElementById('professorAvatar').textContent = initials || 'IC';
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
             }
         }
 
-        // Delete activity
-        function deleteActivity(id) {
-            if (confirm('Are you sure you want to delete this activity?')) {
-                activities = activities.filter(a => a.id !== id);
-                renderAssignments();
-                
-                // Add to activity log
-                activityLog.unshift({
-                    id: activityLog.length + 1,
-                    user: 'Israel Cabasug',
-                    userRole: 'Professor',
-                    avatar: 'IC',
-                    type: 'assignment_deleted',
-                    title: 'Deleted an activity',
-                    details: 'Activity was removed from the course',
-                    time: new Date().toISOString(),
-                    badge: 'created'
-                });
-                renderActivityLog(document.getElementById('activityFilter').value);
-            }
-        }
+        // ═══════════════════════════════════════════════════════════════════
+        // ACTIVITIES
+        // ═══════════════════════════════════════════════════════════════════
 
-        // Save activity
-        document.getElementById('saveActivityBtn').onclick = () => {
-            const title = document.getElementById('activityTitle').value;
-            const description = document.getElementById('activityDescription').value;
+        async function handleCreateActivity() {
+            const title = document.getElementById('activityTitle').value.trim();
+            const description = document.getElementById('activityDescription').value.trim();
             const dueDate = document.getElementById('dueDate').value;
-            const dueTime = document.getElementById('dueTime').value;
-            const points = document.getElementById('points').value;
+            const maxScoreRaw = document.getElementById('maxScore').value;
+            const maxScore = maxScoreRaw !== '' ? parseInt(maxScoreRaw) : null;
+            const status = document.getElementById('activityStatus').value;
 
-            if (!title || !description || !dueDate || !dueTime || !points) {
-                alert('Please fill in all required fields');
+            // Validation — only title and status are required
+            if (!title || !status) {
+                showNotification('Title and Status are required', 'error');
                 return;
             }
 
-            if (window.editingActivityId) {
-                // Update existing activity
-                const index = activities.findIndex(a => a.id === window.editingActivityId);
-                if (index !== -1) {
-                    activities[index] = {
-                        ...activities[index],
-                        title,
-                        description,
-                        dueDate,
-                        dueTime,
-                        points: parseInt(points)
-                    };
-                    
-                    // Add to activity log
-                    activityLog.unshift({
-                        id: activityLog.length + 1,
-                        user: 'Israel Cabasug',
-                        userRole: 'Professor',
-                        avatar: 'IC',
-                        type: 'assignment_updated',
-                        title: `Updated activity: ${title}`,
-                        details: `Due: ${formatDate(dueDate)} • ${points} points`,
-                        time: new Date().toISOString(),
-                        badge: 'created'
-                    });
+            if (maxScore !== null && (Number.isNaN(maxScore) || maxScore < 0 || maxScore > 1000)) {
+                showNotification('Max score must be between 0 and 1000', 'error');
+                return;
+            }
+
+            if (!classroomId) {
+                showNotification('Classroom ID is missing', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('saveActivityBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+
+            try {
+                // Convert date to ISO datetime string only if provided
+                const dueDateTimeString = dueDate ? `${dueDate}T23:59:00` : null;
+
+                const response = await fetch(
+                    `${API_BASE_URL}/classrooms/${classroomId}/activities`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            title,
+                            description: description || null,
+                            dueDate: dueDateTimeString,
+                            maxScore,
+                            status
+                        })
+                    }
+                );
+
+                const responseText = await response.text();
+                let payload = null;
+                if (responseText) {
+                    try {
+                        payload = JSON.parse(responseText);
+                    } catch (_) {
+                        payload = null;
+                    }
                 }
-                delete window.editingActivityId;
-            } else {
-                // Create new activity
-                const newActivity = {
-                    id: activities.length + 1,
-                    title,
-                    description,
-                    dueDate,
-                    dueTime,
-                    points: parseInt(points),
-                    totalStudents: 1,
-                    passedStudents: 0,
-                    failedStudents: 0,
-                    pendingStudents: 1,
-                    status: 'active'
-                };
-                activities.push(newActivity);
 
-                // Add to activity log
-                activityLog.unshift({
-                    id: activityLog.length + 1,
-                    user: 'Israel Cabasug',
-                    userRole: 'Professor',
-                    avatar: 'IC',
-                    type: 'assignment_created',
-                    title: `Created new activity: ${title}`,
-                    details: `Due: ${formatDate(dueDate)} • ${points} points`,
-                    time: new Date().toISOString(),
-                    badge: 'created'
-                });
-            }
+                if (!response.ok) {
+                    throw new Error(payload?.message || payload?.error || `Server error: ${response.status}`);
+                }
 
-            // Close modal
-            document.getElementById('createActivityModal').classList.remove('active');
-            document.getElementById('createActivityForm').reset();
-            
-            // Re-render
-            renderAssignments();
-            renderActivityLog(document.getElementById('activityFilter').value);
-        };
+                if (payload?.success === false) {
+                    throw new Error(payload?.message || 'Failed to create activity');
+                }
 
-        // Filter activity
-        document.getElementById('activityFilter').addEventListener('change', (e) => {
-            renderActivityLog(e.target.value);
-        });
+                const createdActivity = payload?.data ?? payload;
+                if (createdActivity && createdActivity.activityId) {
+                    activities = [createdActivity, ...activities];
+                    renderActivities();
+                }
 
-        // Modal controls
-        document.getElementById('createActivityBtn').onclick = () => {
-            document.getElementById('createActivityModal').classList.add('active');
-        };
-
-        document.getElementById('closeModalBtn').onclick = () => {
-            document.getElementById('createActivityModal').classList.remove('active');
-            document.getElementById('createActivityForm').reset();
-            delete window.editingActivityId;
-        };
-
-        document.getElementById('cancelBtn').onclick = () => {
-            document.getElementById('createActivityModal').classList.remove('active');
-            document.getElementById('createActivityForm').reset();
-            delete window.editingActivityId;
-        };
-
-        // Back to Dashboard button
-        document.getElementById('backToDashboardBtn').onclick = (e) => {
-            e.preventDefault();
-            alert('Returning to main dashboard...');
-            // window.location.href = '/dashboard';
-        };
-
-        // Close modal when clicking outside
-        window.onclick = (e) => {
-            const modal = document.getElementById('createActivityModal');
-            if (e.target === modal) {
-                modal.classList.remove('active');
+                showNotification('Activity created successfully!', 'success');
+                
+                closeModal(document.getElementById('createActivityModal'));
                 document.getElementById('createActivityForm').reset();
-                delete window.editingActivityId;
+
+            } catch (error) {
+                console.error('Error creating activity:', error);
+                showNotification(error.message || 'Failed to create activity', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Activity';
             }
-        };
+        }
 
-        // Initialize
-        renderAssignments();
-        renderActivityLog();
+        async function loadActivities() {
+            if (!classroomId) return;
 
-        // Set default due date to 2 weeks from now
-        const today = new Date('2026-03-05');
-        const twoWeeksLater = new Date(today);
-        twoWeeksLater.setDate(today.getDate() + 14);
-        document.getElementById('dueDate').value = twoWeeksLater.toISOString().split('T')[0];
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/classrooms/${classroomId}/activities`,
+                    {
+                        method: 'GET',
+                        credentials: 'include'
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok || result.success === false) {
+                    if (response.status === 404 || response.status === 405) {
+                        activities = [];
+                        renderActivities();
+                        return;
+                    }
+                    throw new Error(result.error || 'Failed to load activities');
+                }
+
+                activities = Array.isArray(result.data) ? result.data : [];
+                renderActivities();
+
+            } catch (error) {
+                console.error('Error loading activities:', error);
+                showNotification(error.message || 'Failed to load activities', 'error');
+            }
+        }
+
+        function renderActivities() {
+            const assignmentsList = document.getElementById('assignmentsList');
+            
+            if (activities.length === 0) {
+                assignmentsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No activities yet. Create your first one!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            assignmentsList.innerHTML = activities.map(activity => {
+                const hasDueDate = !!activity.dueDate;
+                const daysLeft = hasDueDate ? getDaysLeft(activity.dueDate) : null;
+                const formattedDueDate = hasDueDate ? formatDate(activity.dueDate) : null;
+                
+                return `
+                    <div class="assignment-card">
+                        <div class="assignment-header">
+                            <div class="assignment-title">
+                                <i class="fas fa-tasks"></i>
+                                ${activity.title}
+                            </div>
+                            <div class="assignment-actions">
+                                <button class="action-btn" onclick="editActivity('${activity.activityId}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn" onclick="deleteActivity('${activity.activityId}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        ${activity.description ? `<div class="assignment-desc">${activity.description}</div>` : ''}
+                        <div class="assignment-meta">
+                            ${hasDueDate ? `
+                            <span>
+                                <i class="fas fa-calendar-alt"></i>
+                                Due: ${formattedDueDate}
+                            </span>
+                            <span class="days-left ${daysLeft <= 7 ? 'urgent' : 'normal'}">
+                                <i class="fas fa-hourglass-half"></i>
+                                ${daysLeft > 0 ? daysLeft + ' days left' : 'Overdue'}
+                            </span>` : `
+                            <span>
+                                <i class="fas fa-calendar-alt"></i>
+                                No due date
+                            </span>`}
+                            ${activity.maxScore != null ? `
+                            <span class="points">
+                                <i class="fas fa-star"></i>
+                                ${activity.maxScore} points
+                            </span>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function editActivity(activityId) {
+            showNotification('Edit functionality coming soon', 'info');
+        }
+
+        async function deleteActivity(activityId) {
+            if (!confirm('Are you sure you want to delete this activity?')) return;
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/classrooms/${classroomId}/activities/${activityId}`,
+                    {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    }
+                );
+
+                const result = await response.json().catch(() => null);
+
+                if (!response.ok || result?.success === false) {
+                    throw new Error(result?.message || result?.error || 'Failed to delete activity');
+                }
+
+                showNotification('Activity deleted successfully', 'success');
+                await loadActivities();
+
+            } catch (error) {
+                console.error('Error deleting activity:', error);
+                showNotification(error.message || 'Failed to delete activity', 'error');
+            }
+        }
+
+        function filterActivityLog(filter) {
+            // Implement filtering logic if needed
+        }
     </script>
 </body>
 </html>
