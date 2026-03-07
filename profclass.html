@@ -458,6 +458,14 @@
             font-size: 18px;
         }
 
+        .student-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+
         .student-info {
             flex: 1;
         }
@@ -1164,6 +1172,7 @@
         let classroomId = null;
         let currentUser = null;
         let activities = [];
+        let students = [];
         let activityLog = [];
 
         // ═══════════════════════════════════════════════════════════════════
@@ -1173,6 +1182,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             extractClassroomId();
             loadUserProfile();
+            loadStudents();
             loadActivities();
             setupEventListeners();
         });
@@ -1205,6 +1215,12 @@
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text ?? '';
+            return div.innerHTML;
         }
 
         function timeAgo(dateString) {
@@ -1331,6 +1347,116 @@
                 console.error('Error loading profile:', error);
                 showNotification('Failed to load profile', 'error');
             }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // STUDENTS
+        // ═══════════════════════════════════════════════════════════════════
+
+        async function loadStudents() {
+            if (!classroomId) return;
+
+            const studentsList = document.getElementById('studentsList');
+            if (studentsList) {
+                studentsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading students...</p>
+                    </div>
+                `;
+            }
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/classrooms/${classroomId}/students`,
+                    {
+                        method: 'GET',
+                        credentials: 'include'
+                    }
+                );
+
+                const result = await response.json().catch(() => null);
+
+                if (!response.ok || result?.success === false) {
+                    if (response.status === 401) {
+                        window.location.replace('index.html');
+                        return;
+                    }
+
+                    if (response.status === 404 || response.status === 405) {
+                        students = [];
+                        renderStudents();
+                        return;
+                    }
+
+                    throw new Error(result?.message || result?.error || 'Failed to load students');
+                }
+
+                students = Array.isArray(result?.data) ? result.data : [];
+                renderStudents();
+
+            } catch (error) {
+                console.error('Error loading students:', error);
+                students = [];
+                renderStudents();
+            }
+        }
+
+        function renderStudents() {
+            const studentsList = document.getElementById('studentsList');
+            if (!studentsList) return;
+
+            if (students.length === 0) {
+                studentsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No students enrolled yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            studentsList.innerHTML = students.map(student => {
+                const studentUserId = student.studentUserId || '';
+                const status = String(student.status || 'ACTIVE').toLowerCase();
+                const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+                const firstName = String(student.firstName || '').trim();
+                const lastName = String(student.lastName || '').trim();
+                const displayName = `${firstName} ${lastName}`.trim() || student.fullName || student.username || 'Student';
+                const profileUrl = String(student.profileUrl || '').trim();
+                const initials = displayName
+                    .split(' ')
+                    .filter(Boolean)
+                    .map(part => part.charAt(0))
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase() || 'ST';
+
+                const lastActiveText = student.lastActiveAt
+                    ? `${timeAgo(student.lastActiveAt)}`
+                    : 'No recent activity';
+
+                const analyticsUrl = `studentclass.html?classroomId=${encodeURIComponent(classroomId)}&studentId=${encodeURIComponent(studentUserId)}`;
+
+                return `
+                    <a class="student-card-link" href="${analyticsUrl}">
+                        <div class="student-card">
+                            <div class="student-avatar">${profileUrl ? `<img src="${escapeHtml(profileUrl)}" alt="${escapeHtml(displayName)}">` : escapeHtml(initials)}</div>
+                            <div class="student-info">
+                                <div class="student-name">${escapeHtml(displayName)}</div>
+                                <div class="student-status">Status: ${escapeHtml(statusLabel)}</div>
+                                <div class="student-last-active">
+                                    <i class="far fa-clock"></i>
+                                    ${escapeHtml(lastActiveText)}
+                                </div>
+                            </div>
+                            <div class="student-progress">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
         }
 
         // ═══════════════════════════════════════════════════════════════════
