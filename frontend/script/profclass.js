@@ -247,12 +247,9 @@ const API_BASE_URL = 'http://localhost:8080/api';
             }
 
             studentsList.innerHTML = students.map(student => {
-                const studentUserId = student.studentUserId || '';
-                const status = String(student.status || 'ACTIVE').toLowerCase();
-                const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
                 const firstName = String(student.firstName || '').trim();
                 const lastName = String(student.lastName || '').trim();
-                const displayName = `${firstName} ${lastName}`.trim() || student.fullName || student.username || 'Student';
+                const displayName = `${firstName} ${lastName}`.trim() || 'Student';
                 const profileUrl = String(student.profileUrl || '').trim();
                 const initials = displayName
                     .split(' ')
@@ -266,7 +263,8 @@ const API_BASE_URL = 'http://localhost:8080/api';
                     ? `${timeAgo(student.lastActiveAt)}`
                     : 'No recent activity';
 
-                const analyticsUrl = `studentclass.html?classroomId=${encodeURIComponent(classroomId)}&studentId=${encodeURIComponent(studentUserId)}`;
+                const studentId = student.studentUserId || '';
+                const analyticsUrl = `studentclass.html?classroomId=${encodeURIComponent(classroomId)}&studentId=${encodeURIComponent(studentId)}`;
 
                 return `
                     <a class="student-card-link" href="${analyticsUrl}">
@@ -274,7 +272,6 @@ const API_BASE_URL = 'http://localhost:8080/api';
                             <div class="student-avatar">${profileUrl ? `<img src="${escapeHtml(profileUrl)}" alt="${escapeHtml(displayName)}">` : escapeHtml(initials)}</div>
                             <div class="student-info">
                                 <div class="student-name">${escapeHtml(displayName)}</div>
-                                <div class="student-status">Status: ${escapeHtml(statusLabel)}</div>
                                 <div class="student-last-active">
                                     <i class="far fa-clock"></i>
                                     ${escapeHtml(lastActiveText)}
