@@ -585,10 +585,10 @@ async function loadClasses() {
 
     } catch (error) {
         console.error('ERROR in loadClasses:', error);
-        if (container) {
-            container.innerHTML = '<p class="error-message">Failed to load classes. Please try again.</p>';
-        }
-        showNotification('Failed to load classes', 'error');
+        classroomsData.created = [];
+        classroomsData.joined  = [];
+        updateTabCounts();
+        renderClasses();
     }
 }
 
