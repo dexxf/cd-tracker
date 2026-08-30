@@ -474,6 +474,10 @@ a {
   }
 
   .login-page {
+    position: fixed;
+    inset: 1rem;
+    height: auto;
+    min-height: 0;
     overflow: hidden;
   }
 }
