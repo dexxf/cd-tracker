@@ -173,6 +173,7 @@ a {
 }
 
 body {
+  margin: 1rem;
   background-color: var(--color-page) !important;
   color: var(--color-text) !important;
 }
