@@ -1,6 +1,6 @@
 
 (function attachApiClient(globalScope) {
-  const DEFAULT_API_BASE_URL = "https://codetracker-production-afd9.up.railway.app";
+  const DEFAULT_API_BASE_URL = "https://codetracker-production-afd9.up.railway.app/api";
 
   function normalizeBaseUrl(value) {
     return String(value || "").trim().replace(/\/+$/, "");
