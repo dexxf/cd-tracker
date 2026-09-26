@@ -544,6 +544,56 @@
       border-left-color: var(--accent-yellow);
     }
 
+    .finding-card {
+      margin: 10px 0;
+      padding: 12px;
+      border: 1px solid rgba(255, 107, 107, 0.28);
+      border-left: 3px solid var(--accent-red);
+      border-radius: 8px;
+      background: rgba(255, 107, 107, 0.05);
+    }
+
+    .finding-card.warning {
+      border-color: rgba(245, 184, 61, 0.3);
+      border-left-color: var(--accent-yellow);
+      background: rgba(245, 184, 61, 0.05);
+    }
+
+    .finding-title {
+      font-weight: 650;
+      margin: 5px 0 10px;
+    }
+
+    .finding-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .finding-tag {
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: var(--bg-input);
+    }
+
+    .finding-detail {
+      margin-top: 9px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    .finding-detail strong {
+      color: var(--text-primary);
+    }
+
+    .finding-action {
+      color: var(--accent-green);
+    }
+
     .error-line-num {
       font-size: 0.75rem;
       color: var(--text-secondary);
@@ -1009,26 +1059,57 @@
       const warningCountEl = document.getElementById("warningCount");
       errorCountEl.textContent = currentErrors.length;
       warningCountEl.textContent = currentWarnings.length;
-      
+
       if (currentErrors.length === 0 && currentWarnings.length === 0) {
         errorListEl.innerHTML = `<div class="no-errors"><i class="fas fa-check-circle fa-2x"></i><div style="margin-top: 10px;">No issues found!</div></div>`;
         return;
       }
-      
+
+      const renderFinding = (finding, isWarning = false) => {
+        const findingType = isWarning ? "warning" : "error";
+        const cause = finding.cause || "The analyzer detected this issue.";
+        const impact = finding.impact || "This may affect correctness, security, or maintainability.";
+        const recommendation = finding.recommendation ||
+          "Review the reported code and correct the issue before continuing.";
+
+        return `
+          <article class="finding-card ${isWarning ? "warning" : ""}">
+            <div class="finding-meta">
+              <span class="finding-tag">Line ${finding.line || "?"}</span>
+              <span class="finding-tag">${escapeHtml(finding.rule_id || findingType.toUpperCase())}</span>
+              <span class="finding-tag">${escapeHtml(finding.category || "code quality")}</span>
+              <span class="finding-tag">${escapeHtml(finding.severity || findingType)}</span>
+            </div>
+
+            <div class="finding-title">
+              ${escapeHtml(finding.message || "Analyzer finding")}
+            </div>
+
+            <div class="finding-detail">
+              <strong>Cause:</strong> ${escapeHtml(cause)}
+            </div>
+
+            <div class="finding-detail">
+              <strong>Impact:</strong> ${escapeHtml(impact)}
+            </div>
+
+            <div class="finding-detail finding-action">
+              <strong>Recommended action:</strong> ${escapeHtml(recommendation)}
+            </div>
+          </article>`;
+      };
+
       let html = "";
       if (currentErrors.length > 0) {
         html += `<div style="margin-bottom: 10px; font-weight: 600; color: var(--accent-red);"><i class="fas fa-times-circle"></i> Errors (${currentErrors.length})</div>`;
-        currentErrors.forEach(err => {
-          html += `<div class="error-item"><div class="error-line-num">Line ${err.line || "?"}</div><div class="error-message">${escapeHtml(err.message)}</div></div>`;
-        });
+        html += currentErrors.map(error => renderFinding(error)).join("");
       }
+
       if (currentWarnings.length > 0) {
-        if (currentErrors.length > 0) html += `<div style="margin: 12px 0 4px;"></div>`;
-        html += `<div style="margin-bottom: 10px; font-weight: 600; color: var(--accent-yellow);"><i class="fas fa-exclamation-triangle"></i> Warnings (${currentWarnings.length})</div>`;
-        currentWarnings.forEach(warn => {
-          html += `<div class="error-item warning"><div class="error-line-num">Line ${warn.line || "?"}</div><div class="error-message">${escapeHtml(warn.message)}</div></div>`;
-        });
+        html += `<div style="margin: 16px 0 10px; font-weight: 600; color: var(--accent-yellow);"><i class="fas fa-exclamation-triangle"></i> Warnings (${currentWarnings.length})</div>`;
+        html += currentWarnings.map(warning => renderFinding(warning, true)).join("");
       }
+
       errorListEl.innerHTML = html;
     }
 
