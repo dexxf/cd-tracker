@@ -1335,8 +1335,24 @@ function renderClasses() {
         return;
     }
 
-    container.innerHTML = classes.map(c => createClassCard(c, isCreated)).join('');
+    container.innerHTML = classes.map(c => createClassCard(c, isCreated)).join('') + createDashboardHeroCard();
     attachClassCardHandlers();
+}
+
+function createDashboardHeroCard() {
+    return `
+        <aside class="dashboard-hero-card" aria-label="CodeTracker encouragement">
+            <div class="welcome-copy">
+                <h1>Code Today,<br><span>Build Tomorrow</span></h1>
+                <span class="welcome-accent" aria-hidden="true"></span>
+                <p>Track your progress, join your classes, and keep leveling up.</p>
+            </div>
+            <div class="code-hero-art" aria-hidden="true">
+                <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+                <div class="hero-plant"><i></i><i></i><i></i><i></i><b></b></div><div class="hero-desk"></div>
+                <div class="hero-laptop"><div class="laptop-screen"><i class="fa-solid fa-code"></i></div><div class="laptop-base"></div></div>
+            </div>
+        </aside>`;
 }
 
 function createClassCard(classroom, isCreated) {

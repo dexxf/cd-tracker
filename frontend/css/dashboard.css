@@ -1609,7 +1609,7 @@ html {
     color: #333;
 }
 
-.welcome-container {
+.dashboard-hero-card {
         grid-column: 1 / -1;
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(290px, 46%);
@@ -1662,9 +1662,9 @@ html {
 .welcome-container > h1, .welcome-container > p { display: none !important; }
 .welcome-copy { position: relative; z-index: 2; align-self: center; max-width: 410px; }
 .welcome-container .welcome-greeting { max-width: none; color: #7fb9e8; font-size: 12px; font-weight: 600; }
-.welcome-container h1 { position: relative; z-index: 1; font-size: clamp(26px, 2.5vw, 40px); line-height: 1.06; letter-spacing: -.035em; margin: 4px 0 14px; color: #eef8ff; }
-.welcome-container h1 span { color: #229dff; }
-.welcome-container .welcome-copy > p:last-child { max-width: 310px; font-size: 15px; line-height: 1.55; color: #a9d6f6; }
+.dashboard-hero-card h1 { position: relative; z-index: 1; font-size: clamp(26px, 2.5vw, 40px); line-height: 1.06; letter-spacing: -.035em; margin: 4px 0 14px; color: #eef8ff; }
+.dashboard-hero-card h1 span { color: #229dff; }
+.dashboard-hero-card .welcome-copy > p:last-child { max-width: 310px; font-size: 15px; line-height: 1.55; color: #a9d6f6; }
 .welcome-accent { display: block; width: 46px; height: 4px; margin: 0 0 16px; border-radius: 999px; background: linear-gradient(90deg, #28aaff, #666dff); }
 .code-hero-art { position: absolute; inset: 0 0 0 auto; width: 51%; overflow: hidden; background: linear-gradient(135deg, transparent 0 17%, rgba(18,121,241,.07) 17.2% 17.6%, transparent 17.8% 44%, rgba(40,149,255,.09) 44.2% 44.5%, transparent 44.8%); }
 .hero-desk { position: absolute; right: -25px; bottom: 20px; width: 88%; height: 34px; border: 1px solid rgba(81,180,255,.5); border-radius: 6px 0 0 6px; background: linear-gradient(160deg, #1477dc, #062f6c 65%, #041d42); box-shadow: 0 16px 22px rgba(0,0,0,.42), 0 0 28px rgba(20,144,255,.3); }
