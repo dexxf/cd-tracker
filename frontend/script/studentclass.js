@@ -70,7 +70,7 @@
   }
 
   function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-  function getActivityId(a) { return a?.activityId || ''; }
+  function getActivityId(a) { return a?.activityId || a?.id || ''; }
   function getActivityTitle(a) { return a?.title || 'Untitled activity'; }
   function getActivityDescription(a) { return a?.description || ''; }
   function getActivityLifecycleStatus(a) {
@@ -98,6 +98,28 @@
   function getTrackedSubmissionStatus(a) {
     const s = String(a?.submissionStatus ?? '').trim().toUpperCase();
     return (s === 'SUBMITTED' || s === 'PENDING' || s === 'GRADED') ? s : '';
+  }
+
+  function extractActivityList(response) {
+    const candidates = [
+      response,
+      response?.data,
+      response?.content,
+      response?.items,
+      response?.data?.content,
+      response?.data?.items,
+    ];
+    return candidates.find(Array.isArray) || [];
+  }
+
+  function mergeActivities(...lists) {
+    const seen = new Set();
+    return lists.flat().filter((activity) => {
+      const id = getActivityId(activity);
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
   }
 
   function getSubmissionStatusMeta(status) {
@@ -356,25 +378,42 @@
     state.isLoading = true;
     renderActivities();
     try {
-      const profile = await apiClient.request('/users/profile', { method: 'GET' }, { redirectOnUnauthorized: false });
-      setStudentProfile(profile);
+      const [profileResult, activitiesResult, unsubmittedResult] = await Promise.allSettled([
+        apiClient.request('/users/profile', { method: 'GET' }, { redirectOnUnauthorized: false }),
+        apiClient.request(
+          `/classrooms/${encodeURIComponent(classroomId)}/activities/student`,
+          { method: 'GET' },
+          { redirectOnUnauthorized: false },
+        ),
+        apiClient.request(
+          `/classrooms/${encodeURIComponent(classroomId)}/activities/unsubmitted`,
+          { method: 'GET', headers: { 'Cache-Control': 'no-cache' } },
+          { redirectOnUnauthorized: false },
+        ),
+      ]);
 
-      const activitiesRes = await apiClient.request(
-        `/classrooms/${encodeURIComponent(classroomId)}/activities/student`,
-        { method: 'GET' }, { redirectOnUnauthorized: false }
+      if (profileResult.status === 'fulfilled') setStudentProfile(profileResult.value);
+
+      state.allActivities = activitiesResult.status === 'fulfilled'
+        ? extractActivityList(activitiesResult.value)
+        : [];
+      const unsubmitted = unsubmittedResult.status === 'fulfilled'
+        ? extractActivityList(unsubmittedResult.value)
+        : [];
+
+      // Some API responses include every student activity but omit the separate
+      // unsubmitted collection. Keep those untracked activities visible.
+      const untracked = state.allActivities.filter(
+        (activity) => !getTrackedSubmissionStatus(activity),
       );
-      state.allActivities = Array.isArray(activitiesRes?.data) ? activitiesRes.data
-        : Array.isArray(activitiesRes) ? activitiesRes : [];
+      state.unsubmitted = mergeActivities(unsubmitted, untracked);
 
-      const unsubRes = await apiClient.request(
-        `/classrooms/${encodeURIComponent(classroomId)}/activities/unsubmitted`,
-        { method: 'GET', headers: { 'Cache-Control': 'no-cache' } },
-        { redirectOnUnauthorized: false }
-      );
-      state.unsubmitted = Array.isArray(unsubRes?.data) ? unsubRes.data
-        : Array.isArray(unsubRes) ? unsubRes : [];
-
-      console.log('[unsubmitted]', state.unsubmitted);
+      if (activitiesResult.status === 'rejected') {
+        console.error('[student activities error]', activitiesResult.reason);
+      }
+      if (unsubmittedResult.status === 'rejected') {
+        console.warn('[unsubmitted activities error]', unsubmittedResult.reason);
+      }
       await loadAnnouncements();
     } catch (err) {
       console.error('[loadAll error]', err);
