@@ -1354,15 +1354,13 @@ function createClassCard(classroom, isCreated) {
             <div class="class-card-header">
                 <div class="class-title-group">
                     <span class="class-code-art" aria-hidden="true"><i class="fas fa-code"></i></span>
-                    <div class="class-title-copy">
-                        <h4 class="class-name">${escapeHtml(className)}</h4>
-                        <p class="class-description">${escapeHtml(description)}</p>
-                    </div>
+                    <h4 class="class-name">${escapeHtml(className)}</h4>
                 </div>
                 ${isCreated
-                    ? '<span class="badge badge-owner"><i class="fas fa-crown"></i> Owner</span>'
-                    : '<span class="badge badge-member"><i class="fas fa-user-check"></i> Member</span>'}
+                    ? '<span class="badge badge-owner">Owner</span>'
+                    : '<span class="badge badge-member">Member</span>'}
             </div>
+            <p class="class-description">${escapeHtml(description)}</p>
             <div class="class-info">
                 <div class="info-item">
                     <i class="fas fa-users"></i>

@@ -390,38 +390,33 @@ html {
 
     /* ── Cards ────────────────────────────────────────────────────── */
     .class-card {
-        overflow: hidden;
-        background: radial-gradient(circle at 9% 0%, rgba(28, 144, 255, .16), transparent 34%), linear-gradient(135deg, #07192b, #091727 58%, #0a2139);
-        border-radius: 12px;
+        background: var(--color-surface);
+        border-radius: 8px;
         padding: 16px;
-        border: 1px solid rgba(89, 168, 244, .25);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, .18), inset 0 1px rgba(177, 222, 255, .06);
-        transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+        border: 1px solid var(--color-surface-hover);
+        transition: border-color 0.15s;
         display: flex;
         flex-direction: column;
         height: 100%;
     }
-    .class-card:hover { border-color: rgba(74, 174, 255, .72); transform: translateY(-2px); box-shadow: 0 13px 26px rgba(0, 0, 0, .27), 0 0 18px rgba(27, 151, 255, .13); }
-    html[data-theme] .class-card { background-color: #07192b !important; background-image: radial-gradient(circle at 9% 0%, rgba(28, 144, 255, .16), transparent 34%), linear-gradient(135deg, #07192b, #091727 58%, #0a2139) !important; box-shadow: 0 8px 20px rgba(0, 0, 0, .18), inset 0 1px rgba(177, 222, 255, .06) !important; }
-    html[data-theme] .class-card:hover { box-shadow: 0 13px 26px rgba(0, 0, 0, .27), 0 0 18px rgba(27, 151, 255, .13) !important; }
+    .class-card:hover { border-color: var(--color-border); }
 
     .class-card-header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 16px;
+        align-items: center;
+        margin-bottom: 6px;
         gap: 8px;
     }
 
-    .class-title-group { display: flex; align-items: center; min-width: 0; gap: 12px; }
-    .class-code-art { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; flex: 0 0 52px; border: 1px solid rgba(92, 186, 255, .42); border-radius: 12px; color: #eff9ff; background: linear-gradient(135deg, #1ab5ff, #2267ff); box-shadow: 0 5px 14px rgba(16, 137, 255, .33), inset 0 1px rgba(255,255,255,.26); font-size: 21px; }
-    .class-title-copy { min-width: 0; }
+    .class-title-group { display: flex; flex: 1; align-items: center; min-width: 0; gap: 8px; }
+    .class-code-art { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex: 0 0 30px; border-radius: 7px; color: #eef8ff; background: linear-gradient(135deg, #16b5ff, #2869ff); font-size: 13px; }
 
     .class-name {
-        color: #eaf7ff;
+        color: var(--color-primary);
         margin: 0;
-        font-size: 17px;
-        font-weight: 700;
+        font-size: 15px;
+        font-weight: 600;
         flex: 1;
         line-height: 1.3;
         white-space: nowrap;
@@ -430,26 +425,23 @@ html {
     }
 
     .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 10px;
-        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-size: 9px;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.3px;
         flex-shrink: 0;
     }
-    .badge-owner  { background: rgba(20, 132, 246, .2); color: #70c4ff; border: 1px solid rgba(51, 158, 255, .22); }
-    .badge-member { background: rgba(36, 181, 127, .16); color: #79e2b5; border: 1px solid rgba(89, 220, 163, .2); }
+    .badge-owner  { background: rgba(31,111,235,0.15); color: var(--color-primary); }
+    .badge-member { background: rgba(35,134,54,0.15); color: var(--color-success); }
 
     .class-description {
         color: var(--color-muted);
-        margin: 3px 0 0;
+        margin: 0 0 10px;
         font-size: 12px;
         line-height: 1.45;
-        flex: initial;
+        flex: 1;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -461,7 +453,7 @@ html {
         align-items: center;
         gap: 14px;
         padding: 8px 0;
-        border-top: 1px solid rgba(96, 169, 232, .16);
+        border-top: 1px solid var(--color-surface-hover);
         flex-wrap: wrap;
     }
 
@@ -469,11 +461,11 @@ html {
         display: flex;
         align-items: center;
         gap: 5px;
-        color: #9cc0df;
-        font-size: 12px;
+        color: var(--color-muted);
+        font-size: 11px;
     }
-    .info-item i      { color: #5eb9ff; width: 12px; text-align: center; font-size: 11px; }
-    .info-item strong { color: #d7efff; font-weight: 700; }
+    .info-item i      { color: var(--color-border-strong); width: 12px; text-align: center; font-size: 10px; }
+    .info-item strong { color: var(--color-text); font-weight: 600; }
     .info-code-row {
         display: inline-flex;
         align-items: center;
@@ -534,14 +526,9 @@ html {
     }
 
     .class-actions .btn {
-        flex: 1;
-        min-height: 44px;
-        font-size: 13px;
-        padding: 8px 12px;
+        font-size: 12px;
+        padding: 6px 12px;
     }
-
-    .class-actions .btn-primary { border: 0; background: linear-gradient(135deg, #14b8ff, #2b5fff); box-shadow: 0 6px 14px rgba(16, 126, 255, .3); }
-    .class-actions .btn-secondary { color: #b7d9f6; background: rgba(42, 85, 126, .32); border-color: rgba(104, 172, 232, .27); }
 
     /* ── Modal ────────────────────────────────────────────────────── */
     .modal {
