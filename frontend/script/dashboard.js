@@ -815,6 +815,8 @@ function applyProfileToUI(data) {
 
     const welcomeUserEl = document.getElementById('welcomeUser');
     if (welcomeUserEl) welcomeUserEl.textContent = firstName || fullName;
+    const welcomeUserHeroEl = document.getElementById('welcomeUserHero');
+    if (welcomeUserHeroEl) welcomeUserHeroEl.textContent = firstName || fullName;
     updateWelcomeBannerVisibility(data);
 
     const userNameEl = document.getElementById('userName');
