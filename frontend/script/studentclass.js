@@ -283,9 +283,17 @@
     }
 
     try {
+      const payload = {
+        // ISO-8601 UTC is deserialized by the API as an Instant.
+        submittedAt: new Date().toISOString(),
+      };
       await apiClient.request(
         `/classrooms/${encodeURIComponent(classroomId)}/activities/${encodeURIComponent(activityId)}/submit`,
-        { method: 'POST' },
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        },
         { redirectOnUnauthorized: false }
       );
       await window.AppDialog?.alert(`${activityTitle} submitted successfully.`, { title: 'Activity Submitted' });
