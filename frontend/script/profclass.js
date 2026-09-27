@@ -1,6 +1,4 @@
 const apiRequest = window.ApiClient?.request;
-const ACTIVITY_TIME_ZONE = "Asia/Singapore";
-const ACTIVITY_TIME_ZONE_OFFSET = "+08:00";
 const ANNOUNCEMENT_MAX_MESSAGE_LENGTH = 5000;
 const ANNOUNCEMENT_ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -1895,7 +1893,8 @@ async function handleEditActivity() {
   const payload = {
     title,
     description: description || null,
-    dueDate: buildZonedDateTime(dueDate),
+    // The API expects an Instant, so send the selected due date in UTC.
+    dueDate: dueDate ? `${dueDate}T23:59:00Z` : null,
     maxScore: null,
     status,
   };
@@ -2741,31 +2740,6 @@ function formatDateInputValue(value) {
   const mm = String(parsed.getMonth() + 1).padStart(2, "0");
   const dd = String(parsed.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
-}
-
-function buildZonedDateTime(value) {
-  const raw = asString(value);
-  if (!raw) return null;
-
-  if (/\[[^\]]+\]$/.test(raw)) {
-    return raw;
-  }
-
-  const normalized =
-    /^\d{4}-\d{2}-\d{2}$/.test(raw) ? `${raw}T23:59:00` : raw;
-  const parsed = parseApiDate(normalized);
-  if (!parsed) {
-    return normalized;
-  }
-
-  const yyyy = parsed.getFullYear();
-  const mm = String(parsed.getMonth() + 1).padStart(2, "0");
-  const dd = String(parsed.getDate()).padStart(2, "0");
-  const hh = String(parsed.getHours()).padStart(2, "0");
-  const min = String(parsed.getMinutes()).padStart(2, "0");
-  const ss = String(parsed.getSeconds()).padStart(2, "0");
-
-  return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}${ACTIVITY_TIME_ZONE_OFFSET}[${ACTIVITY_TIME_ZONE}]`;
 }
 
 async function copyTextWithFeedback(value, successMessage) {
