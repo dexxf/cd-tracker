@@ -435,6 +435,7 @@ html {
     }
     .badge-owner  { background: rgba(31,111,235,0.15); color: var(--color-primary); }
     .badge-member { background: rgba(35,134,54,0.15); color: var(--color-success); }
+    .badge i { margin-right: 4px; }
 
     .class-description {
         color: var(--color-muted);

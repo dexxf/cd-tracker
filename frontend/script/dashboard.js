@@ -1357,8 +1357,8 @@ function createClassCard(classroom, isCreated) {
                     <h4 class="class-name">${escapeHtml(className)}</h4>
                 </div>
                 ${isCreated
-                    ? '<span class="badge badge-owner">Owner</span>'
-                    : '<span class="badge badge-member">Member</span>'}
+                    ? '<span class="badge badge-owner"><i class="fas fa-crown" aria-hidden="true"></i> Owner</span>'
+                    : '<span class="badge badge-member"><i class="fas fa-user-check" aria-hidden="true"></i> Member</span>'}
             </div>
             <p class="class-description">${escapeHtml(description)}</p>
             <div class="class-info">
