@@ -302,23 +302,25 @@ html {
 .tabs-container {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 6px;
+        gap: 2px;
         margin-bottom: 14px;
-        background: var(--color-surface-raised);
-        border: 1px solid var(--color-border);
-        border-radius: 10px;
-        padding: 6px;
+        overflow: hidden;
+        background: #0b1d32;
+        border: 1px solid rgba(77, 164, 244, .3);
+        border-radius: 12px;
+        padding: 0;
     }
 
     .tab-button {
-        padding: 10px 14px;
-        background: transparent;
+        min-height: 52px;
+        padding: 12px 14px;
+        background: linear-gradient(180deg, rgba(22, 58, 95, .78), rgba(11, 34, 59, .78));
         border: none;
         color: var(--color-muted);
         cursor: pointer;
         font-size: 15px;
         font-weight: 600;
-        border-radius: 8px;
+        border-radius: 10px;
         transition: all 0.18s ease;
         display: flex;
         align-items: center;
@@ -326,12 +328,16 @@ html {
         gap: 8px;
         white-space: nowrap;
     }
-    .tab-button:hover  { color: var(--color-heading); background: var(--color-surface-raised); }
+    .tab-button i { color: #a9d7ff; font-size: 18px; }
+    .tab-button:hover  { color: #eff8ff; background: rgba(24, 83, 135, .72); }
     .tab-button.active {
-        color: #f0f6fc;
-        background: linear-gradient(180deg, #2d4158 0%, #24384d 100%);
-        box-shadow: inset 0 0 0 1px rgba(88, 166, 255, 0.45);
+        color: #f8fcff;
+        background: linear-gradient(135deg, #18b9ff 0%, #126bf2 55%, #5a51ff 100%);
+        box-shadow: inset 0 1px rgba(255, 255, 255, .28), 0 4px 15px rgba(16, 124, 255, .34);
     }
+    .tab-button.active i { color: #ffffff; }
+    html[data-theme] .tab-button.active { color: #f8fcff !important; background: linear-gradient(135deg, #18b9ff 0%, #126bf2 55%, #5a51ff 100%) !important; }
+    html[data-theme] .tab-button.active i { color: #ffffff !important; }
 
     .tab-count {
         background: rgba(88, 166, 255, 0.16);
