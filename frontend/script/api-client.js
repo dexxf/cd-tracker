@@ -76,12 +76,37 @@
   let refreshPromise = null;
   let lastRefreshSucceededAt = 0;
   const REFRESH_COOLDOWN_MS = 10000;
+  // Cookies remain the preferred transport. Some deployments return the
+  // refreshed access token in JSON instead, however, and a cookie scoped to
+  // /auth cannot be sent to /users, /classrooms, or /chatbot. Keep that token
+  // in memory for this tab as a safe compatibility fallback (never persist it
+  // to localStorage).
+  let inMemoryAccessToken = null;
   let authLockActive = false;
   let authLockPromptShown = false;
   let authLockOverlay = null;
 
   function isAuthEndpoint(path) {
     return String(path || "").startsWith("/auth/");
+  }
+
+  function getAccessTokenFromResponse(body) {
+    if (!body || typeof body !== "object") return null;
+
+    const candidates = [
+      body.accessToken,
+      body.access_token,
+      body.token,
+      body.jwt,
+      body.data?.accessToken,
+      body.data?.access_token,
+      body.data?.token,
+      body.data?.jwt
+    ];
+
+    return candidates.find(
+      (candidate) => typeof candidate === "string" && candidate.trim()
+    )?.trim() || null;
   }
 
  async function refreshToken() {
@@ -110,6 +135,10 @@
           return false;
         }
 
+        const refreshedAccessToken = getAccessTokenFromResponse(body);
+        if (refreshedAccessToken) {
+          inMemoryAccessToken = refreshedAccessToken;
+        }
         lastRefreshSucceededAt = Date.now();
         console.log("JWT token refreshed successfully");
         return true;
@@ -134,8 +163,14 @@
     let retried = false;
 
     async function makeRequest() {
+      const headers = new Headers(options.headers || {});
+      if (inMemoryAccessToken && !headers.has("Authorization")) {
+        headers.set("Authorization", `Bearer ${inMemoryAccessToken}`);
+      }
+
       const requestOptions = {
         ...options,
+        headers,
         credentials: "include"
       };
 
@@ -302,6 +337,7 @@
       localStorage.removeItem("userData");
       localStorage.removeItem("device_id");
       sessionStorage.clear();
+      inMemoryAccessToken = null;
 
       try {
         const logoutPath = deviceId
@@ -707,7 +743,8 @@
     getDeviceId,
     refreshToken, 
     checkSessionState,
-    _getCookie: getCookie
+    _getCookie: getCookie,
+    _getInMemoryAccessToken: () => inMemoryAccessToken
   };
 
   globalScope.AppDialog = dialog;

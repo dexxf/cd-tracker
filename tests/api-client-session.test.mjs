@@ -59,6 +59,7 @@ function loadApiClient(fetchImplementation) {
     localStorage,
     sessionStorage,
     fetch: fetchImplementation,
+    Headers,
     FormData,
     Blob,
     URLSearchParams,
@@ -153,4 +154,31 @@ test("403 permission errors never trigger token refresh", async () => {
     /Not allowed/
   );
   assert.equal(refreshCalls, 0);
+});
+
+test("a token returned by refresh is used when the access cookie is unavailable", async () => {
+  const protectedRequestHeaders = [];
+  const client = loadApiClient(async (url, options = {}) => {
+    if (url.endsWith("/auth/refresh")) {
+      return jsonResponse(200, { data: { accessToken: "fresh-access-token" } });
+    }
+
+    protectedRequestHeaders.push(new Headers(options.headers));
+    return protectedRequestHeaders.length === 1
+      ? jsonResponse(401, { message: "Expired access token" })
+      : jsonResponse(200, { ok: true });
+  });
+
+  const result = await client.request("/classrooms/example/activities/unsubmitted", {}, {
+    redirectOnUnauthorized: false,
+    retryOnRefresh: true
+  });
+
+  assert.equal(result?.ok, true);
+  assert.equal(protectedRequestHeaders.length, 2);
+  assert.equal(protectedRequestHeaders[0].get("Authorization"), null);
+  assert.equal(
+    protectedRequestHeaders[1].get("Authorization"),
+    "Bearer fresh-access-token"
+  );
 });
