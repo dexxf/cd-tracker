@@ -1322,6 +1322,25 @@
         renderMessage(item)
       );
 
+      // This control belongs to the chatbot instance.  Keeping it here also
+      // means it is recreated whenever a thread is rendered, after any
+      // messages returned by the paginated history endpoint.
+      if (
+        remoteHistoryEnabled &&
+        activeThreadId &&
+        messagesHaveMore
+      ) {
+        const older = document.createElement("button");
+        older.type = "button";
+        older.className = "chatbot-messages-more";
+        older.dataset.loadOlderMessages = "true";
+        older.disabled = isLoadingThread;
+        older.textContent = isLoadingThread
+          ? "Loading older messages…"
+          : "Load older messages";
+        elements.messages.appendChild(older);
+      }
+
       if (scrollToBottom) {
         elements.messages.scrollTop =
           elements.messages.scrollHeight;
@@ -2708,18 +2727,3 @@
       publicApi;
   });
 })();
-      if (
-        remoteHistoryEnabled &&
-        activeThreadId &&
-        messagesHaveMore
-      ) {
-        const older = document.createElement("button");
-        older.type = "button";
-        older.className = "chatbot-messages-more";
-        older.dataset.loadOlderMessages = "true";
-        older.disabled = isLoadingThread;
-        older.textContent = isLoadingThread
-          ? "Loading older messages…"
-          : "Load older messages";
-        elements.messages.appendChild(older);
-      }

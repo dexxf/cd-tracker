@@ -131,8 +131,8 @@ test("a 401 arriving just after refresh is retried without a refresh storm", asy
   });
 
   assert.equal(refreshCalls, 1);
-  assert.equal(endpointCalls.get("https://codetracker-production-979d.up.railway.app/api/first"), 2);
-  assert.equal(endpointCalls.get("https://codetracker-production-979d.up.railway.app/api/second"), 2);
+  assert.equal(endpointCalls.get("https://codetracker-production-afd9.up.railway.app/api/first"), 2);
+  assert.equal(endpointCalls.get("https://codetracker-production-afd9.up.railway.app/api/second"), 2);
 });
 
 test("403 permission errors never trigger token refresh", async () => {

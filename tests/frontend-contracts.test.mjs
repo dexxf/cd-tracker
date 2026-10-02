@@ -44,7 +44,7 @@ test("production frontend contains no stale Railway backend domain", () => {
   ]) {
     const source = read(script);
     assert.doesNotMatch(source, /codetracker-production-ab72/i);
-    assert.match(source, /codetracker-production-979d/i);
+    assert.match(source, /codetracker-production-afd9/i);
   }
 });
 
@@ -64,6 +64,11 @@ test("theme and Echo use the new account persistence endpoints", () => {
   assert.match(chatbot, /\/chatbot\/threads/);
   assert.match(chatbot, /threadId/);
   assert.match(chatbot, /Load older messages/);
+  assert.match(
+    chatbot,
+    /function renderHistory[\s\S]*?history\.forEach[\s\S]*?remoteHistoryEnabled[\s\S]*?Load older messages/
+  );
+  assert.doesNotMatch(chatbot, /\}\)\(\);\s*if\s*\(\s*remoteHistoryEnabled/);
 });
 
 test("framed page spacing stays constrained on desktop and mobile", () => {
