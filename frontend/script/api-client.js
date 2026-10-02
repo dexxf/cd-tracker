@@ -1,6 +1,6 @@
 
 (function attachApiClient(globalScope) {
-  const DEFAULT_API_BASE_URL = "https://codetracker-production-afd9.up.railway.app/api";
+  "use strict";
 
   function normalizeBaseUrl(value) {
     return String(value || "").trim().replace(/\/+$/, "");
@@ -9,7 +9,10 @@
   function resolveApiBaseUrl() {
     const fromWindow = globalScope.__CODETRACKER_API_BASE_URL || globalScope.__API_BASE_URL;
     const fromMeta = document.querySelector('meta[name="api-base-url"]')?.getAttribute("content");
-    const chosen = fromWindow || fromMeta || DEFAULT_API_BASE_URL;
+    const chosen = fromWindow || fromMeta || globalScope.CodeTrackerConfig?.apiBaseUrl;
+    if (!chosen) {
+      throw new Error("Load runtime-config.js before api-client.js.");
+    }
     return normalizeBaseUrl(chosen);
   }
 
@@ -75,6 +78,7 @@
   let isRefreshing = false;
   let refreshPromise = null;
   let lastRefreshSucceededAt = 0;
+  let refreshFailedUntil = 0;
   const REFRESH_COOLDOWN_MS = 10000;
   // Cookies remain the preferred transport. Some deployments return the
   // refreshed access token in JSON instead, however, and a cookie scoped to
@@ -109,12 +113,19 @@
     )?.trim() || null;
   }
 
- async function refreshToken() {
-    // REMOVED the deviceId null check that was failing
+  function sessionHeaders(initialHeaders = {}) {
+    const headers = new Headers(initialHeaders);
+    if (inMemoryAccessToken && !headers.has("Authorization")) {
+      headers.set("Authorization", `Bearer ${inMemoryAccessToken}`);
+    }
+    return headers;
+  }
 
+  async function refreshToken() {
     if (isRefreshing && refreshPromise) {
       return refreshPromise;
     }
+    if (Date.now() < refreshFailedUntil) return false;
 
     isRefreshing = true;
 
@@ -131,6 +142,9 @@
         const body = await parseResponseBody(response);
 
         if (!response.ok) {
+          inMemoryAccessToken = null;
+          lastRefreshSucceededAt = 0;
+          refreshFailedUntil = Date.now() + REFRESH_COOLDOWN_MS;
           console.error("Token refresh failed:", extractErrorMessage(body, `Refresh failed with status ${response.status}`));
           return false;
         }
@@ -139,10 +153,30 @@
         if (refreshedAccessToken) {
           inMemoryAccessToken = refreshedAccessToken;
         }
+        // Verify the refreshed cookie or in-memory token before reporting success.
+        const checkResponse = await fetch(`${API_BASE_URL}/auth/check`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          headers: sessionHeaders({ Accept: "application/json" })
+        });
+        const checkBody = await parseResponseBody(checkResponse);
+        if (!checkResponse.ok || checkBody?.authenticated !== true) {
+          inMemoryAccessToken = null;
+          lastRefreshSucceededAt = 0;
+          refreshFailedUntil = Date.now() + REFRESH_COOLDOWN_MS;
+          console.error("Refresh completed, but the session is still unauthenticated. Check JWT cookie settings, blocked cookies, and deployment consistency.");
+          return false;
+        }
+
+        refreshFailedUntil = 0;
         lastRefreshSucceededAt = Date.now();
         console.log("JWT token refreshed successfully");
         return true;
       } catch (error) {
+        inMemoryAccessToken = null;
+        lastRefreshSucceededAt = 0;
+        refreshFailedUntil = Date.now() + REFRESH_COOLDOWN_MS;
         console.error("Refresh token error:", error);
         return false;
       } finally {
@@ -163,10 +197,7 @@
     let retried = false;
 
     async function makeRequest() {
-      const headers = new Headers(options.headers || {});
-      if (inMemoryAccessToken && !headers.has("Authorization")) {
-        headers.set("Authorization", `Bearer ${inMemoryAccessToken}`);
-      }
+      const headers = sessionHeaders(options.headers || {});
 
       const requestOptions = {
         ...options,
@@ -211,7 +242,11 @@
         throw new Error("Authentication required");
       }
 
-      throw new Error(extractErrorMessage(body, `Server error: ${response.status}`));
+      const error = new Error(extractErrorMessage(body, `Server error: ${response.status}`));
+      error.status = response.status;
+      error.body = body;
+      error.path = path;
+      throw error;
     }
 
     return body;
@@ -274,6 +309,7 @@
       const response = await fetch(`${API_BASE_URL}/auth/check`, {
         method: "GET",
         credentials: "include",
+        cache: "no-store",
         headers: {
           Accept: "application/json"
         }
@@ -741,7 +777,7 @@
     checkAndRedirectIfAuthenticated,
     logout,
     getDeviceId,
-    refreshToken, 
+    refreshToken,
     checkSessionState,
     _getCookie: getCookie,
     _getInMemoryAccessToken: () => inMemoryAccessToken
