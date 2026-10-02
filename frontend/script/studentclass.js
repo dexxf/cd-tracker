@@ -691,7 +691,11 @@
     const activity = state.currentActivity;
     if (!activity) { await window.AppDialog?.alert('Select an activity first.', { title: 'Missing Activity' }); return; }
 
-    const mode = submissionModeSelect?.value === 'new' ? 'new' : 'existing';
+    const mode = submissionModeSelect?.value;
+    if (mode !== 'existing' && mode !== 'new') {
+      await window.AppDialog?.alert('Please select a submission type.', { title: 'Submission Type Required' });
+      return;
+    }
     let repositoryUrl = '';
 
     if (mode === 'existing') {
@@ -725,20 +729,19 @@
         { redirectOnUnauthorized: false }
       );
 
-      const unsubRes = await apiClient.request(
-        `/classrooms/${encodeURIComponent(classroomId)}/activities/unsubmitted`,
-        { method: 'GET', headers: { 'Cache-Control': 'no-cache' } },
-        { redirectOnUnauthorized: false }
+      // A completed POST is the source of truth. Do not show a submission
+      // failure merely because the follow-up list refresh is temporarily
+      // unavailable or returns a differently-shaped response.
+      state.unsubmitted = state.unsubmitted.filter(
+        (item) => getActivityId(item) !== getActivityId(activity),
       );
-      state.unsubmitted = Array.isArray(unsubRes?.data) ? unsubRes.data
-        : Array.isArray(unsubRes) ? unsubRes : [];
-
       renderActivities();
       setSubmitButtonState('success');
       await sleep(700);
       closeSubmissionModal();
       clearSubmissionForm();
       await window.AppDialog?.alert('Assignment submitted successfully.', { title: 'Success' });
+      await loadAll();
     } catch (err) {
       setSubmitButtonState('error');
       await window.AppDialog?.alert(err.message || 'Failed to submit assignment.', { title: 'Submission Failed' });
