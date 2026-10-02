@@ -621,6 +621,25 @@
     try { localStorage.setItem(cacheKeyForClassroom(id), JSON.stringify(announcements || [])); } catch (_) {}
   }
 
+  // submit/existing accepts a browser-facing GitHub URL. GitHub's `url`
+  // property is its REST API URL and must never be sent to that endpoint.
+  function normalizeGithubRepositoryUrl(value) {
+    try {
+      const url = new URL(String(value || '').trim());
+      const host = url.hostname.toLowerCase();
+      if (host !== 'github.com' && host !== 'www.github.com') return '';
+
+      const segments = url.pathname.split('/').filter(Boolean).slice(0, 2);
+      if (segments.length !== 2) return '';
+
+      const [owner, repository] = segments;
+      if (!owner || !repository) return '';
+      return `https://github.com/${owner}/${repository.replace(/\.git$/i, '')}`;
+    } catch (_) {
+      return '';
+    }
+  }
+
   async function loadGithubRepos() {
     const sel = document.getElementById('repoSelect');
     if (!sel) return;
@@ -633,8 +652,11 @@
         ? '<option value="">No repositories found</option>'
         : '<option value="">— Select a repository —</option>' + repos.map(r => {
             const name = r.fullName || r.full_name || r.name || '';
-            const url  = r.htmlUrl  || r.html_url  || r.url  || '';
-            return `<option value="${url}">${name}</option>`;
+            const url  = normalizeGithubRepositoryUrl(
+              r.htmlUrl || r.html_url || r.htmlURL
+            );
+            if (!name || !url) return '';
+            return `<option value="${escapeHtml(url)}">${escapeHtml(name)}</option>`;
           }).join('');
     } catch {
       sel.innerHTML = '<option value="">Failed to load repositories</option>';
@@ -673,7 +695,9 @@
     let repositoryUrl = '';
 
     if (mode === 'existing') {
-      repositoryUrl = document.getElementById('repoSelect')?.value.trim() || '';
+      repositoryUrl = normalizeGithubRepositoryUrl(
+        document.getElementById('repoSelect')?.value
+      );
       if (!repositoryUrl) { await window.AppDialog?.alert('Please select a repository.', { title: 'No Repository Selected' }); return; }
       if (!repositoryUrl.includes('github.com')) { await window.AppDialog?.alert('Please select a valid GitHub repository.', { title: 'Invalid Repository' }); return; }
     } else {
