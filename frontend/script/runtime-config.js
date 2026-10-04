@@ -4,10 +4,12 @@
   // Edit deployment URLs here. All pages load this file before their clients.
   // Keep secrets (Gemini keys, JWT keys, OAuth secrets) on the backend only.
   const defaults = {
-    apiBaseUrl: "https://codetracker-production-afd9.up.railway.app/api",
-    // The former analyzer deployment returns Railway's "Application not found".
+    apiBaseUrl: "https://anayzer-production-7c72.up.railway.app/api",
+    // No analyzer service is currently deployed. Do not point this at a stale
+    // Railway hostname: the grading page uses this empty value to prevent an
+    // analysis request that would fail with a misleading connection error.
     // Set this to the replacement analyzer service's HTTPS origin when restored.
-    analyzerBaseUrl: "https://analyzer-production-7c72.up.railway.app",
+    analyzerBaseUrl: "",
     features: {
       // These account APIs do not exist in the supplied backend yet.
       // Local theme selection and browser chat history remain available.
