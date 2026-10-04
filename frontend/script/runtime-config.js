@@ -7,7 +7,7 @@
     apiBaseUrl: "https://codetracker-production-afd9.up.railway.app/api",
     // The former analyzer deployment returns Railway's "Application not found".
     // Set this to the replacement analyzer service's HTTPS origin when restored.
-    analyzerBaseUrl: "https://analyzer-production-7c72.up.railway.app",
+    analyzerBaseUrl: "https://anayzer-production-7c72.up.railway.app",
     features: {
       // These account APIs do not exist in the supplied backend yet.
       // Local theme selection and browser chat history remain available.
