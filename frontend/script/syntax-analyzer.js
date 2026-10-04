@@ -159,11 +159,45 @@
       currentErrors = Array.isArray(file.errors) ? file.errors : [];
       currentWarnings = Array.isArray(file.warnings) ? file.warnings : [];
       updateErrorPanel();
-      displayCode(String(file.code ?? file.content ?? "// No code content available"));
+      displayCode(String(file.code ?? file.content ?? "// No code content available"), file.language);
       renderFileList(document.getElementById("fileSearch").value);
     };
 
-    function displayCode(code) {
+    function appendHighlightedCode(target, code, language) {
+      const normalizedLanguage = String(language || "").toLowerCase();
+      const isPython = normalizedLanguage.includes("python") || normalizedLanguage === "py";
+      const keywords = isPython
+        ? "and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield"
+        : "abstract|auto|break|case|catch|class|const|continue|default|do|else|enum|extends|final|finally|for|if|implements|import|interface|namespace|new|override|package|private|protected|public|return|static|struct|switch|template|this|throw|throws|try|typedef|typename|using|virtual|void|while";
+      const types = isPython
+        ? "bool|bytes|dict|float|int|list|object|set|str|tuple|None|True|False"
+        : "boolean|byte|char|double|float|int|long|short|signed|size_t|string|unsigned|var|wchar_t|String|System|true|false|null|NULL";
+      const comments = isPython ? "#.*" : "//.*|/\\*[\\s\\S]*?\\*/";
+      const tokenPattern = new RegExp(
+        `(${comments})|(?:\"(?:\\\\.|[^\"\\\\])*\"|'(?:\\\\.|[^'\\\\])*')|\\b(?:${keywords})\\b|\\b(?:${types})\\b|\\b\\d+(?:\\.\\d+)?\\b|\\b[A-Za-z_]\\w*(?=\\s*\\()`,
+        "g"
+      );
+      const tokenClass = (token) => {
+        if (new RegExp(`^(?:${comments})$`).test(token)) return "syntax-comment";
+        if (/^(?:\"|'|`)/.test(token)) return "syntax-string";
+        if (new RegExp(`^(?:${keywords})$`).test(token)) return "syntax-keyword";
+        if (new RegExp(`^(?:${types})$`).test(token)) return "syntax-type";
+        if (/^\d/.test(token)) return "syntax-number";
+        return "syntax-function";
+      };
+      let lastIndex = 0;
+      for (const match of code.matchAll(tokenPattern)) {
+        if (match.index > lastIndex) target.append(document.createTextNode(code.slice(lastIndex, match.index)));
+        const token = document.createElement("span");
+        token.className = `syntax-token ${tokenClass(match[0])}`;
+        token.textContent = match[0];
+        target.append(token);
+        lastIndex = match.index + match[0].length;
+      }
+      if (lastIndex < code.length) target.append(document.createTextNode(code.slice(lastIndex)));
+    }
+
+    function displayCode(code, language) {
       const lines = code.split(/\r?\n/);
       const codeContentEl = document.getElementById("codeContent");
       codeContentEl.innerHTML = "";
@@ -182,7 +216,7 @@
 
         const lineText = document.createElement("span");
         lineText.className = "line-text";
-        lineText.textContent = lines[i] || " ";
+        appendHighlightedCode(lineText, lines[i] || " ", language);
 
         lineContent.appendChild(lineNumber);
         lineContent.appendChild(lineText);

@@ -495,6 +495,15 @@
       white-space: pre;
     }
 
+    /* Visual Studio Dark+ syntax palette. Tokens are created with textContent
+       in syntax-analyzer.js, so repository code cannot inject markup. */
+    .syntax-comment { color: #6a9955; }
+    .syntax-keyword { color: #569cd6; }
+    .syntax-type { color: #4ec9b0; }
+    .syntax-string { color: #ce9178; }
+    .syntax-number { color: #b5cea8; }
+    .syntax-function { color: #dcdcaa; }
+
     .code-line.error-line {
       background: rgba(255, 107, 107, 0.16);
       border-left-color: var(--accent-red);
