@@ -23,6 +23,10 @@
     currentActivityTab: 'needs-submission',
     isLoading: true,
     announcements: [],
+    repositorySubmissionInFlight: false,
+    activitySubmissionsInFlight: new Set(),
+    confirmedActivities: new Map(),
+    loadRevision: 0,
   };
 
   function escapeHtml(value) {
@@ -51,8 +55,9 @@
 
   function renderPrimaryMetaField(icon, label, value, isLink = false, valueClass = '') {
     const text = String(value ?? '').trim() || 'X';
-    const valueHtml = isLink && text !== 'X'
-      ? `<a href="${escapeHtml(text)}" target="_blank" rel="noopener noreferrer">${escapeHtml(text)}</a>`
+    const url = isLink ? normalizeGithubRepositoryUrl(text) : '';
+    const valueHtml = url
+      ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(text)}</a>`
       : escapeHtml(text);
     return `
       <div class="assignment-meta-field">
@@ -69,7 +74,6 @@
     return Math.ceil((d.getTime() - Date.now()) / 86400000);
   }
 
-  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
   function getActivityId(a) { return a?.activityId || a?.id || ''; }
   function getActivityTitle(a) { return a?.title || 'Untitled activity'; }
   function getActivityDescription(a) { return a?.description || ''; }
@@ -98,6 +102,38 @@
   function getTrackedSubmissionStatus(a) {
     const s = String(a?.submissionStatus ?? '').trim().toUpperCase();
     return (s === 'SUBMITTED' || s === 'PENDING' || s === 'GRADED') ? s : '';
+  }
+
+  function needsRepository(activity) {
+    const status = getTrackedSubmissionStatus(activity);
+    if (status === 'SUBMITTED' || status === 'GRADED') return false;
+    return !activity?.repositoryAttached && !activity?.repositoryUrl && !activity?.repositoryName;
+  }
+
+  // Keep an accepted write visible until the list endpoint catches up.
+  // A failed refresh must not make a successful submission look unsuccessful.
+  function rememberActivity(activity, changes) {
+    const updated = { ...activity, ...changes };
+    const id = getActivityId(updated);
+    state.confirmedActivities.set(id, updated);
+    state.allActivities = [updated, ...state.allActivities.filter(a => getActivityId(a) !== id)];
+    state.unsubmitted = state.unsubmitted.filter(a => getActivityId(a) !== id);
+    renderActivities();
+  }
+
+  function mergeConfirmedActivities(activities) {
+    const rank = { PENDING: 1, SUBMITTED: 2, GRADED: 3 };
+    return mergeActivities(activities, [...state.confirmedActivities.values()]).map(activity => {
+      const id = getActivityId(activity);
+      const confirmed = state.confirmedActivities.get(id);
+      if (!confirmed) return activity;
+      if (!needsRepository(activity) &&
+          rank[getTrackedSubmissionStatus(activity)] >= rank[getTrackedSubmissionStatus(confirmed)]) {
+        state.confirmedActivities.delete(id);
+        return activity;
+      }
+      return { ...activity, ...confirmed };
+    });
   }
 
   function extractActivityList(response) {
@@ -177,7 +213,7 @@
     const lifecycleStatus = getActivityLifecycleStatus(activity);
 
     const submitRepoBtn = needsRepo
-      ? `<button type="button" class="submit-repo-btn" data-submit-activity-id="${escapeHtml(id)}"><i class="fas fa-paper-plane"></i> Submit repo</button>`
+      ? `<button type="button" class="submit-repo-btn" data-submit-activity-id="${escapeHtml(id)}"><i class="fab fa-github"></i> Attach repository</button>`
       : '';
 
     const submittedPill = submissionMeta
@@ -199,7 +235,7 @@
       ${renderPrimaryMetaField('fas fa-calendar-day', 'Due date', dueDate)}
       ${renderPrimaryMetaField('fas fa-star', 'Points', points === 'X' ? 'X' : `${points} pts`, false, 'points')}
       ${renderPrimaryMetaField('fas fa-chart-line', 'Score', score === 'X' ? 'X' : `${score} pts`)}
-      ${renderPrimaryMetaField('fas fa-clock', 'Submitted at', formatDateTime(activity?.submittedAt))}
+      ${renderPrimaryMetaField('fas fa-clock', 'Submitted at', trackedSubmissionStatus === 'SUBMITTED' || trackedSubmissionStatus === 'GRADED' ? formatDateTime(activity?.submittedAt) : 'Not submitted')}
       ${renderPrimaryMetaField('fab fa-github', 'Repository URL', activity?.repositoryUrl, true)}
     `;
 
@@ -239,8 +275,9 @@
   function renderDetailsField(icon, label, value, isLink = false) {
     const cleanValue = String(value ?? '').trim();
     if (!cleanValue) return '';
-    const valueHtml = isLink
-      ? `<a href="${escapeHtml(cleanValue)}" target="_blank" rel="noopener noreferrer">${escapeHtml(cleanValue)}</a>`
+    const url = isLink ? normalizeGithubRepositoryUrl(cleanValue) : '';
+    const valueHtml = url
+      ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(cleanValue)}</a>`
       : escapeHtml(cleanValue);
     return `
       <div class="activity-details-item">
@@ -268,7 +305,7 @@
         ${renderDetailsField('fas fa-code-branch', 'Repository name', activity.repositoryName || 'N/A')}
         ${renderDetailsField('fab fa-github', 'Repository URL', activity.repositoryUrl || '', true)}
         ${renderDetailsField('fas fa-sliders', 'Repository mode', activity.repositoryMode || 'N/A')}
-        ${renderDetailsField('fas fa-clock', 'Submitted at', activity.submittedAt ? new Date(activity.submittedAt).toLocaleString() : 'Not submitted')}
+        ${renderDetailsField('fas fa-clock', 'Submitted at', (submissionStatus === 'SUBMITTED' || submissionStatus === 'GRADED') && activity.submittedAt ? new Date(activity.submittedAt).toLocaleString() : 'Not submitted')}
         ${renderDetailsField('fas fa-chart-line', 'Score', activity.score != null ? `${activity.score}` : 'Not graded')}
         ${renderDetailsField('fas fa-comment-dots', 'Feedback', activity.feedback || 'No feedback yet')}
       </div>`;
@@ -286,42 +323,44 @@
   }
 
   async function submitPendingActivity(activityId, buttonEl) {
-    if (!activityId) return;
+    if (!activityId || state.activitySubmissionsInFlight.has(activityId)) return;
     const activity = state.allActivities.find(a => getActivityId(a) === activityId);
+    if (!activity || needsRepository(activity) || getTrackedSubmissionStatus(activity) !== 'PENDING') return;
     const activityTitle = getActivityTitle(activity);
-    const approved = await window.AppDialog?.confirm(
-      `Submit "${activityTitle}" now? You can still view its status in tracked activities.`,
-      {
-        title: 'Confirm Submission',
-        confirmText: 'Submit Activity',
-        cancelText: 'Cancel'
-      }
-    );
-    if (!approved) return;
-
+    state.activitySubmissionsInFlight.add(activityId);
+    const originalLabel = buttonEl?.innerHTML;
     if (buttonEl) {
       buttonEl.disabled = true;
       buttonEl.classList.add('is-disabled');
     }
-
     try {
-      const payload = {
-        // ISO-8601 UTC is deserialized by the API as an Instant.
-        submittedAt: new Date().toISOString(),
-      };
-      await apiClient.request(
+      const approved = await window.AppDialog?.confirm(
+        `Submit "${activityTitle}" now? This saves the latest commit on your repository's default branch. Push your work to GitHub first.`,
+        { title: 'Confirm Submission', confirmText: 'Submit Activity', cancelText: 'Cancel' }
+      );
+      if (!approved) return;
+      if (buttonEl) buttonEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting…';
+      const response = await apiClient.request(
         `/classrooms/${encodeURIComponent(classroomId)}/activities/${encodeURIComponent(activityId)}/submit`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        },
+        { method: 'POST' },
         { redirectOnUnauthorized: false }
       );
+      rememberActivity(activity, {
+        ...response?.data,
+        submissionStatus: response?.data?.submissionStatus || 'SUBMITTED',
+        submittedAt: response?.data?.submittedAt || new Date().toISOString(),
+      });
       await window.AppDialog?.alert(`${activityTitle} submitted successfully.`, { title: 'Activity Submitted' });
       await loadAll();
     } catch (err) {
       await window.AppDialog?.alert(err?.message || 'Failed to submit activity.', { title: 'Submission Failed' });
+    } finally {
+      state.activitySubmissionsInFlight.delete(activityId);
+      if (buttonEl) {
+        buttonEl.disabled = false;
+        buttonEl.classList.remove('is-disabled');
+        buttonEl.innerHTML = originalLabel;
+      }
     }
   }
 
@@ -329,10 +368,10 @@
     const container = document.getElementById('activitiesContainer');
     if (!container) return;
 
-    const tracked = state.allActivities.filter(a => getTrackedSubmissionStatus(a));
+    const tracked = state.allActivities.filter(a => getTrackedSubmissionStatus(a) && !needsRepository(a));
 
     if (assignmentCount) assignmentCount.textContent = state.allActivities.length;
-    if (pendingCount)    pendingCount.textContent    = state.unsubmitted.length;
+    if (pendingCount)    pendingCount.textContent    = state.unsubmitted.length + tracked.filter(a => getTrackedSubmissionStatus(a) === 'PENDING').length;
 
     const submittedCountEl = document.getElementById('submittedCount');
     if (submittedCountEl) {
@@ -369,12 +408,13 @@
         return true;
       });
       container.innerHTML = filtered.length === 0
-        ? renderEmptyState('No tracked activities yet', 'Activities will appear here once you submit them.', 'fas fa-tasks')
+        ? renderEmptyState('No tracked activities yet', 'Activities appear here after you attach a repository.', 'fas fa-tasks')
         : filtered.map(a => renderCard(a, false)).join('');
     }
   }
 
   async function loadAll() {
+    const revision = ++state.loadRevision;
     state.isLoading = true;
     renderActivities();
     try {
@@ -392,21 +432,27 @@
         ),
       ]);
 
+      if (revision !== state.loadRevision) return;
+
       if (profileResult.status === 'fulfilled') setStudentProfile(profileResult.value);
 
-      state.allActivities = activitiesResult.status === 'fulfilled'
+      state.allActivities = mergeConfirmedActivities(activitiesResult.status === 'fulfilled'
         ? extractActivityList(activitiesResult.value)
-        : [];
+        : state.allActivities);
       const unsubmitted = unsubmittedResult.status === 'fulfilled'
         ? extractActivityList(unsubmittedResult.value)
-        : [];
+        : state.unsubmitted;
 
       // Some API responses include every student activity but omit the separate
       // unsubmitted collection. Keep those untracked activities visible.
-      const untracked = state.allActivities.filter(
-        (activity) => !getTrackedSubmissionStatus(activity),
-      );
-      state.unsubmitted = mergeActivities(unsubmitted, untracked);
+      const untracked = state.allActivities.filter(needsRepository);
+      const trackedIds = new Set(state.allActivities.filter(a => !needsRepository(a)).map(getActivityId));
+      state.unsubmitted = mergeActivities(unsubmitted, untracked)
+        .filter(a => !trackedIds.has(getActivityId(a)));
+      state.allActivities = mergeActivities(state.allActivities, state.unsubmitted);
+
+      const notice = document.getElementById('activityLoadNotice');
+      if (notice) notice.hidden = activitiesResult.status === 'fulfilled' && unsubmittedResult.status === 'fulfilled';
 
       if (activitiesResult.status === 'rejected') {
         console.error('[student activities error]', activitiesResult.reason);
@@ -418,9 +464,11 @@
     } catch (err) {
       console.error('[loadAll error]', err);
     } finally {
-      state.isLoading = false;
-      renderActivities();
-      loadClassroomInfo();
+      if (revision === state.loadRevision) {
+        state.isLoading = false;
+        renderActivities();
+        loadClassroomInfo();
+      }
     }
   }
 
@@ -626,15 +674,17 @@
   function normalizeGithubRepositoryUrl(value) {
     try {
       const url = new URL(String(value || '').trim());
+      if (url.protocol !== 'https:' || url.username || url.password || url.port || url.search || url.hash) return '';
       const host = url.hostname.toLowerCase();
       if (host !== 'github.com' && host !== 'www.github.com') return '';
 
-      const segments = url.pathname.split('/').filter(Boolean).slice(0, 2);
+      const segments = url.pathname.split('/').filter(Boolean);
       if (segments.length !== 2) return '';
 
       const [owner, repository] = segments;
-      if (!owner || !repository) return '';
-      return `https://github.com/${owner}/${repository.replace(/\.git$/i, '')}`;
+      const name = repository.replace(/\.git$/i, '');
+      if (!/^[a-zA-Z0-9-]+$/.test(owner) || !/^[a-zA-Z0-9._-]{1,100}$/.test(name) || name === '.' || name === '..') return '';
+      return `https://github.com/${owner}/${name}`;
     } catch (_) {
       return '';
     }
@@ -648,20 +698,18 @@
     try {
       const res   = await apiClient.request('/github/repositories', { method: 'GET' });
       const repos = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
-      sel.innerHTML = repos.length === 0
+      const options = repos.map(r => {
+        const name = r.fullName || r.full_name || r.name || '';
+        const url = normalizeGithubRepositoryUrl(r.htmlUrl || r.html_url || r.htmlURL);
+        return name && url ? `<option value="${escapeHtml(url)}">${escapeHtml(name)}</option>` : '';
+      }).filter(Boolean);
+      sel.innerHTML = options.length === 0
         ? '<option value="">No repositories found</option>'
-        : '<option value="">— Select a repository —</option>' + repos.map(r => {
-            const name = r.fullName || r.full_name || r.name || '';
-            const url  = normalizeGithubRepositoryUrl(
-              r.htmlUrl || r.html_url || r.htmlURL
-            );
-            if (!name || !url) return '';
-            return `<option value="${escapeHtml(url)}">${escapeHtml(name)}</option>`;
-          }).join('');
+        : '<option value="">— Select a repository —</option>' + options.join('');
     } catch {
       sel.innerHTML = '<option value="">Failed to load repositories</option>';
     } finally {
-      sel.disabled = false;
+      sel.disabled = state.repositorySubmissionInFlight;
     }
   }
 
@@ -671,27 +719,31 @@
     if (mode === 'loading') {
       submitAssignmentBtn.disabled = true;
       submitAssignmentBtn.classList.add('is-loading');
-      submitAssignmentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+      submitAssignmentBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Attaching…';
     } else if (mode === 'success') {
       submitAssignmentBtn.disabled = true;
       submitAssignmentBtn.classList.add('is-success');
-      submitAssignmentBtn.innerHTML = '<i class="fas fa-check"></i> Submitted!';
+      submitAssignmentBtn.innerHTML = '<i class="fas fa-check"></i> Attached!';
     } else if (mode === 'error') {
       submitAssignmentBtn.disabled = false;
       submitAssignmentBtn.classList.add('is-error');
       submitAssignmentBtn.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Try Again';
     } else {
       submitAssignmentBtn.disabled = false;
-      submitAssignmentBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Assignment';
+      submitAssignmentBtn.innerHTML = '<i class="fab fa-github"></i> Attach Repository';
     }
   }
 
   async function submitAssignment() {
-    if (submitAssignmentBtn?.disabled) return;
+    if (state.repositorySubmissionInFlight || submitAssignmentBtn?.disabled) return;
     const activity = state.currentActivity;
     if (!activity) { await window.AppDialog?.alert('Select an activity first.', { title: 'Missing Activity' }); return; }
 
-    const mode = submissionModeSelect?.value === 'new' ? 'new' : 'existing';
+    const mode = submissionModeSelect?.value;
+    if (mode !== 'new' && mode !== 'existing') {
+      await window.AppDialog?.alert('Choose an existing repository or create a new one.', { title: 'Choose Repository Type' });
+      return;
+    }
     let repositoryUrl = '';
 
     if (mode === 'existing') {
@@ -699,61 +751,62 @@
         document.getElementById('repoSelect')?.value
       );
       if (!repositoryUrl) { await window.AppDialog?.alert('Please select a repository.', { title: 'No Repository Selected' }); return; }
-      if (!repositoryUrl.includes('github.com')) { await window.AppDialog?.alert('Please select a valid GitHub repository.', { title: 'Invalid Repository' }); return; }
     } else {
       const name = document.getElementById('repositoryName')?.value.trim() || '';
       if (!name) { await window.AppDialog?.alert('Please enter a repository name.', { title: 'Missing Name' }); return; }
+      if (!/^[a-zA-Z0-9._-]{1,100}$/.test(name) || name === '.' || name === '..') {
+        await window.AppDialog?.alert('Use 1–100 letters, numbers, periods, hyphens, or underscores.', { title: 'Invalid Repository Name' });
+        return;
+      }
       repositoryUrl = name;
     }
 
-    const approved = await window.AppDialog?.confirm(
-      `Are you sure you want to submit "${getActivityTitle(activity)}"?`,
-      {
-        title: 'Confirm Assignment Submission',
-        confirmText: 'Submit Assignment',
-        cancelText: 'Review'
-      }
-    );
-    if (!approved) return;
-
+    state.repositorySubmissionInFlight = true;
+    setSubmissionInputsDisabled(true);
     setSubmitButtonState('loading');
     try {
+      const approved = await window.AppDialog?.confirm(
+        `Attach a repository to "${getActivityTitle(activity)}"? You will submit your finished work from Tracked Activities.`,
+        { title: 'Attach Repository', confirmText: 'Attach Repository', cancelText: 'Review' }
+      );
+      if (!approved) return;
       const body = mode === 'new' ? { repositoryName: repositoryUrl } : { repositoryUrl };
-      await apiClient.request(
+      const response = await apiClient.request(
         `/classrooms/${encodeURIComponent(classroomId)}/activities/${encodeURIComponent(getActivityId(activity))}/submit/${mode}`,
         { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
         { redirectOnUnauthorized: false }
       );
 
-      // Preserve the existing list refresh, but do not report a completed
-      // submission as failed if that optional refresh is unavailable.
-      try {
-        const unsubRes = await apiClient.request(
-          `/classrooms/${encodeURIComponent(classroomId)}/activities/unsubmitted`,
-          { method: 'GET', headers: { 'Cache-Control': 'no-cache' } },
-          { redirectOnUnauthorized: false }
-        );
-        state.unsubmitted = Array.isArray(unsubRes?.data) ? unsubRes.data
-          : Array.isArray(unsubRes) ? unsubRes : [];
-      } catch (refreshError) {
-        console.warn('[submission refresh error]', refreshError);
-      }
+      rememberActivity(activity, {
+        ...response?.data,
+        submissionStatus: response?.data?.submissionStatus || 'PENDING',
+        repositoryAttached: true,
+        repositoryUrl: mode === 'existing' ? repositoryUrl : null,
+        repositoryName: mode === 'new' ? repositoryUrl : repositoryUrl.split('/').pop(),
+        repositoryMode: mode.toUpperCase(),
+      });
+      state.currentActivityTab = 'tracked';
+      state.filters.trackedSubmission = 'ALL';
+      document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === 'tracked'));
+      document.querySelectorAll('[data-tracked-filter]').forEach(b => b.classList.toggle('active', b.dataset.trackedFilter === 'ALL'));
       renderActivities();
       setSubmitButtonState('success');
-      await sleep(700);
-      closeSubmissionModal();
+      closeSubmissionModal({ force: true });
       clearSubmissionForm();
-      await window.AppDialog?.alert('Assignment submitted successfully.', { title: 'Success' });
-      loadAll();
+      await window.AppDialog?.alert('Repository attached. Push your finished work to GitHub, then click Submit Activity in Tracked Activities.', { title: 'Repository Attached' });
+      await loadAll();
     } catch (err) {
       setSubmitButtonState('error');
-      await window.AppDialog?.alert(err.message || 'Failed to submit assignment.', { title: 'Submission Failed' });
-      await sleep(1200);
+      await window.AppDialog?.alert(err?.message || 'Failed to attach repository. Please try again.', { title: 'Attachment Failed' });
+    } finally {
+      state.repositorySubmissionInFlight = false;
+      setSubmissionInputsDisabled(false);
       setSubmitButtonState('idle');
     }
   }
 
   function openSubmissionModal(activityId) {
+    if (state.repositorySubmissionInFlight) return;
     const activity = state.unsubmitted.find(a => getActivityId(a) === activityId)
       || state.allActivities.find(a => getActivityId(a) === activityId);
     if (!activity) { window.AppDialog?.alert('Activity not found.', { title: 'Missing Activity' }); return; }
@@ -777,17 +830,28 @@
     }
   }
 
-  function closeSubmissionModal() {
+  function closeSubmissionModal({ force = false } = {}) {
+    if (state.repositorySubmissionInFlight && !force) return;
     if (!submissionModal) return;
     submissionModal.style.opacity = '0';
-    setTimeout(() => { submissionModal.style.display = 'none'; submissionModal.style.opacity = ''; setSubmitButtonState('idle'); }, 200);
+    setTimeout(() => { submissionModal.style.display = 'none'; submissionModal.style.opacity = ''; }, 200);
   }
 
   function clearSubmissionForm() {
     const r = document.getElementById('repositoryName');
     if (r) r.value = '';
-    if (submissionModeSelect) submissionModeSelect.value = 'existing';
-    applySubmissionMode('existing');
+    if (submissionModeSelect) submissionModeSelect.value = '';
+    const select = document.getElementById('repoSelect');
+    if (select) select.value = '';
+    applySubmissionMode('');
+  }
+
+  function setSubmissionInputsDisabled(disabled) {
+    for (const id of ['submissionMode', 'repositoryName', 'repoSelect', 'cancelSubmitBtn', 'closeModal']) {
+      const element = document.getElementById(id);
+      if (element) element.disabled = disabled;
+    }
+    submissionModal?.setAttribute('aria-busy', String(disabled));
   }
 
   function applySubmissionMode(mode) {
@@ -805,6 +869,8 @@
 
   function attachEventHandlers() {
     setSubmitButtonState('idle');
+
+    document.getElementById('reloadActivitiesBtn')?.addEventListener('click', loadAll);
 
     document.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => {
       state.currentActivityTab = btn.dataset.tab;
@@ -834,7 +900,10 @@
       applySubmissionMode(submissionModeSelect.value || '');
     }
 
-    submitAssignmentBtn?.addEventListener('click', submitAssignment);
+    document.getElementById('submissionForm')?.addEventListener('submit', e => {
+      e.preventDefault();
+      submitAssignment();
+    });
 
     assignmentsList?.addEventListener('click', async e => {
       const repoBtn = e.target.closest('[data-submit-activity-id]');

@@ -121,6 +121,10 @@
                 <button class="tracked-filter-btn" data-tracked-filter="NOT_SUBMITTED">Not Submitted</button>
                 <button class="tracked-filter-btn" data-tracked-filter="GRADED">Graded</button>
               </div>
+              <div id="activityLoadNotice" class="activity-load-notice" role="status" hidden>
+                <span>Activities could not be refreshed. Your saved work is kept.</span>
+                <button type="button" class="btn btn-secondary" id="reloadActivitiesBtn">Try again</button>
+              </div>
               <div id="activitiesContainer" class="activities-container"></div>
             </div>
           </div>
@@ -149,22 +153,23 @@
     <div class="modal" id="submissionModal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2><i class="fas fa-paper-plane"></i> Submit Assignment</h2>
+          <h2><i class="fab fa-github"></i> Attach Repository</h2>
           <button class="close-btn" id="closeModal" aria-label="Close">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="assignment-detail" id="modalAssignmentDetail"></div>
+          <p class="submission-guidance">First attach your GitHub repository. When your work is ready, push it to GitHub and choose <strong>Submit Activity</strong> in Tracked Activities.</p>
 
           <form id="submissionForm">
             <div class="form-group">
               <label for="submissionMode">
-                <i class="fas fa-code-branch"></i> Submission Type
+                <i class="fas fa-code-branch"></i> Repository Type
               </label>
-              <select id="submissionMode">
-                <option value="" disabled hidden>— Select submission type —</option>
-                <option value="existing">Submit existing repository</option>
-                <option value="new">Create and submit new repository</option>
+              <select id="submissionMode" required>
+                <option value="" disabled hidden>— Choose repository type —</option>
+                <option value="existing">Use existing repository</option>
+                <option value="new">Create new repository</option>
               </select>
             </div>
 
@@ -189,8 +194,9 @@
                   type="text"
                   id="repositoryName"
                   placeholder="my-awesome-project"
-                  pattern="[a-zA-Z0-9_\-]+"
-                  title="Letters, numbers, hyphens, underscores only"
+                  maxlength="100"
+                  pattern="[a-zA-Z0-9._\-]{1,100}"
+                  title="1–100 letters, numbers, periods, hyphens, or underscores"
                 />
               </div>
             </div>
@@ -200,8 +206,8 @@
 
         <div class="modal-footer">
           <button class="btn btn-secondary" id="cancelSubmitBtn">Cancel</button>
-          <button class="btn btn-primary" id="submitAssignmentBtn">
-            <i class="fas fa-paper-plane"></i> Submit Assignment
+          <button type="submit" form="submissionForm" class="btn btn-primary" id="submitAssignmentBtn">
+            <i class="fab fa-github"></i> Attach Repository
           </button>
         </div>
       </div>

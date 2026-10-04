@@ -1189,6 +1189,30 @@ body {
 .repo-hint:hover .repo-hint-tooltip { display: block; }
 
 /* Modal footer */
+.submission-guidance {
+  margin: 0 0 18px;
+  padding: 12px;
+  color: var(--fg-muted);
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.activity-load-notice:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
