@@ -506,6 +506,10 @@ html {
         align-items: center;
         gap: 6px;
     }
+    /* Keep the classroom invite code distinct from the other card metadata. */
+    .info-code-row strong {
+        color: #f59e0b;
+    }
     .copy-code-btn {
         display: inline-flex;
         align-items: center;
