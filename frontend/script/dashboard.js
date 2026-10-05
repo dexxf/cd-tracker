@@ -31,7 +31,6 @@ const removePictureBtn     = document.getElementById('removePictureBtn');
 const profilePictureInput  = document.getElementById('profilePictureInput');
 const saveProfileBtn       = document.getElementById('saveProfileBtn');
 const welcomeBanner        = document.getElementById('welcomeBanner');
-const hideWelcomeBtn       = document.getElementById('hideWelcomeBtn');
 
 // Form inputs — Create Class
 const classNameInput       = document.getElementById('classNameInput');
@@ -63,7 +62,6 @@ let currentManageClassroomStatus = 'ACTIVE';
 
 // Current user
 let currentUser = null;
-const welcomeBannerStoragePrefix = 'codetracker:dashboard:welcome-hidden:';
 const normalizeSearchText = (value) => String(value || '').trim().toLowerCase();
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -584,7 +582,6 @@ function setupEventListeners() {
         openProfileModal();
     });
     logoutBtn?.addEventListener('click', handleLogout);
-    hideWelcomeBtn?.addEventListener('click', handleHideWelcomeBanner);
 
     // Profile modal
     closeProfileModal?.addEventListener('click', () => closeModal(profileModal));
@@ -838,45 +835,9 @@ function applyProfileToUI(data) {
     }
 }
 
-function getUserStorageId(user) {
-    if (!user || typeof user !== 'object') return '';
-    return String(
-        user.userId ||
-        user.id ||
-        user.uid ||
-        user.uuid ||
-        user.email ||
-        ''
-    ).trim().toLowerCase();
-}
-
-function getWelcomeBannerStorageKey(user) {
-    const userStorageId = getUserStorageId(user);
-    return userStorageId ? `${welcomeBannerStoragePrefix}${userStorageId}` : '';
-}
-
-function isWelcomeBannerHiddenForUser(user) {
-    const key = getWelcomeBannerStorageKey(user);
-    if (!key) return false;
-    return localStorage.getItem(key) === '1';
-}
-
-function setWelcomeBannerHiddenForUser(user, isHidden) {
-    const key = getWelcomeBannerStorageKey(user);
-    if (!key) return;
-    localStorage.setItem(key, isHidden ? '1' : '0');
-}
-
-function updateWelcomeBannerVisibility(user = currentUser) {
+function updateWelcomeBannerVisibility() {
     if (!welcomeBanner) return;
-    const isHidden = isWelcomeBannerHiddenForUser(user);
-    welcomeBanner.classList.toggle('is-hidden', isHidden);
-}
-
-function handleHideWelcomeBanner() {
-    if (!currentUser) return;
-    setWelcomeBannerHiddenForUser(currentUser, true);
-    updateWelcomeBannerVisibility(currentUser);
+    welcomeBanner.classList.remove('is-hidden');
 }
 
 function toggleProfileDropdown(e) {

@@ -604,7 +604,6 @@ html[data-theme="light"] :where(
 
 html[data-theme="light"] :where(
   .floating-dropdown-btn,
-  .welcome-hide-btn,
   .toggle-password
 ) {
   color: var(--color-heading) !important;

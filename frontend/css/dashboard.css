@@ -1624,36 +1624,6 @@ html {
         position: relative;
     }
 
-.welcome-container.is-hidden {
-    display: none;
-}
-
-.welcome-hide-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 24px;
-    height: 24px;
-    border: 1px solid #3a4553;
-    background: #0f1620;
-    color: var(--color-muted);
-    border-radius: 50%;
-    padding: 0;
-    font-size: 14px;
-    line-height: 1;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.welcome-hide-btn:hover {
-    background: #1f2a38;
-    color: #fff;
-    border-color: #55677d;
-}
-
     
 #welcomeUser {
     color: var(--color-primary);
@@ -1744,10 +1714,6 @@ html {
 
     .welcome-container {
         padding: 18px 14px;
-    }
-    .welcome-hide-btn {
-        top: 10px;
-        right: 10px;
     }
     .welcome-container h1 { font-size: 22px; }
     .welcome-container p { font-size: 14px; }
