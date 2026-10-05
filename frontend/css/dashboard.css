@@ -195,16 +195,16 @@ html {
         color: #ff9ca6;
         background: linear-gradient(135deg, #3d0d17, #25070d);
         border: 1px solid #8b2637;
-        box-shadow: inset 0 0 12px rgba(238, 58, 82, 0.16), 0 0 9px rgba(196, 37, 59, 0.32);
+        box-shadow: none;
         font-weight: 600;
         letter-spacing: 0.01em;
-        text-shadow: 0 0 7px rgba(255, 102, 119, 0.58);
+        text-shadow: none;
     }
     .class-actions .btn.leave-room:hover {
         color: #fff;
         background: linear-gradient(135deg, #681522, #3d0d17);
         border-color: #e45163;
-        box-shadow: inset 0 0 14px rgba(255, 76, 101, 0.25), 0 0 14px rgba(224, 48, 72, 0.58);
+        box-shadow: none;
         transform: translateY(-1px);
     }
 
@@ -213,16 +213,16 @@ html {
         color: #9be8b8;
         background: linear-gradient(135deg, #0b3723, #052116);
         border: 1px solid #237e4d;
-        box-shadow: inset 0 0 12px rgba(48, 202, 116, 0.15), 0 0 9px rgba(32, 167, 88, 0.3);
+        box-shadow: none;
         font-weight: 600;
         letter-spacing: 0.01em;
-        text-shadow: 0 0 7px rgba(111, 241, 160, 0.54);
+        text-shadow: none;
     }
     .class-actions .btn.manage-class:hover {
         color: #effff5;
         background: linear-gradient(135deg, #105334, #0a2e1e);
         border-color: #50c77d;
-        box-shadow: inset 0 0 14px rgba(67, 231, 135, 0.24), 0 0 14px rgba(46, 198, 104, 0.55);
+        box-shadow: none;
         transform: translateY(-1px);
     }
 
