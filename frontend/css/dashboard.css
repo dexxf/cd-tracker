@@ -192,36 +192,36 @@ html {
     /* Classroom secondary actions use the same strong type treatment as the title. */
     .class-actions .btn.leave-room {
         flex: 1;
-        color: #ff9ca6;
-        background: linear-gradient(135deg, #3d0d17, #25070d);
-        border: 1px solid #8b2637;
+        color: #991f31;
+        background: #ffe5e9;
+        border: 1px solid #f3a6b1;
         box-shadow: none;
         font-weight: 600;
         letter-spacing: 0.01em;
         text-shadow: none;
     }
     .class-actions .btn.leave-room:hover {
-        color: #fff;
-        background: linear-gradient(135deg, #681522, #3d0d17);
-        border-color: #e45163;
+        color: #741222;
+        background: #ffd2d9;
+        border-color: #dc6e7e;
         box-shadow: none;
         transform: translateY(-1px);
     }
 
     .class-actions .btn.manage-class {
         flex: 1;
-        color: #9be8b8;
-        background: linear-gradient(135deg, #0b3723, #052116);
-        border: 1px solid #237e4d;
+        color: #176a3b;
+        background: #e2f7e9;
+        border: 1px solid #9cdab2;
         box-shadow: none;
         font-weight: 600;
         letter-spacing: 0.01em;
         text-shadow: none;
     }
     .class-actions .btn.manage-class:hover {
-        color: #effff5;
-        background: linear-gradient(135deg, #105334, #0a2e1e);
-        border-color: #50c77d;
+        color: #10532d;
+        background: #c9f0d7;
+        border-color: #59ae79;
         box-shadow: none;
         transform: translateY(-1px);
     }
