@@ -86,8 +86,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!window.ApiClient) return;
 
   try {
-    // Backend cookies cannot be read from a frontend on another origin.
-    // Let the backend check and refresh them through credentialed requests.
+    // Session cookies are intentionally HttpOnly; the API client checks them
+    // through credentialed requests rather than reading them in JavaScript.
     await redirectAuthenticatedSession();
   } catch (error) {
     console.warn("Auto-redirect check failed:", error);

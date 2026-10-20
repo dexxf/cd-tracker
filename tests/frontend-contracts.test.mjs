@@ -49,7 +49,8 @@ test("deployment URLs have one source and contain no expired backend domain", ()
     assert.doesNotMatch(source, /codetracker-production-(ab72|979d)/i);
     assert.match(source, /CodeTrackerConfig/);
   }
-  assert.match(read("frontend/script/runtime-config.js"), /codetracker-production-afd9/);
+  assert.match(read("frontend/script/runtime-config.js"), /apiBaseUrl:\s*["']\/api["']/);
+  assert.match(read("vercel.json"), /codetracker-production-afd9/);
 });
 
 test("Echo registers initialization without leaking private history variables at script scope", () => {
